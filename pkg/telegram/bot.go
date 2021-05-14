@@ -149,6 +149,45 @@ func (b *Bot) SendPhoto(chatID int64, photoPath string) error {
 	return nil
 }
 
+func (b *Bot) SendDocument(chatID int64, documentPath string) error {
+	w, formBody, err := createMultipartForm("document", documentPath)
+	if err != nil {
+		return err
+	}
+
+	u, err := url.Parse(fmt.Sprintf("%s%s/sendDocument", baseBotURL, b.Token))
+	if err != nil {
+		return err
+	}
+
+	q := url.Values{}
+	q.Set("chat_id", fmt.Sprint(chatID))
+	u.RawQuery = q.Encode()
+
+	resp, err := http.Post(u.String(), w.FormDataContentType(), formBody)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	var respContent Response
+	err = json.Unmarshal(body, &respContent)
+	if err != nil {
+		return err
+	}
+
+	if !respContent.Ok {
+		return fmt.Errorf("error code: %v; description: %s", respContent.ErrorCode, respContent.Description)
+	}
+
+	return nil
+}
+
 func (b *Bot) GetFile(fileID string) (File, error) {
 	u, err := url.Parse(fmt.Sprintf("%s%s/getFile", baseBotURL, b.Token))
 	if err != nil {
