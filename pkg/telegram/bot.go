@@ -19,8 +19,8 @@ type Bot struct {
 	Token string
 }
 
-func (s *Bot) GetUpdates(offset int64) ([]Update, error) {
-	u, err := url.Parse(fmt.Sprintf("%s%s/getUpdates", baseBotURL, s.Token))
+func (b *Bot) GetUpdates(offset int64) ([]Update, error) {
+	u, err := url.Parse(fmt.Sprintf("%s%s/getUpdates", baseBotURL, b.Token))
 	if err != nil {
 		return nil, err
 	}
@@ -29,38 +29,22 @@ func (s *Bot) GetUpdates(offset int64) ([]Update, error) {
 		"offset":          offset,
 		"limit":           100,
 		"timeout":         20,
-		"allowed_updates": []string{"message"},
+		"allowed_updates": []string{"message", "callback_query"},
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := http.Post(u.String(), "application/json", bytes.NewBuffer(reqJSON))
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
+	resp, err := b.sendPostRequest(u.String(), "application/json", bytes.NewBuffer(reqJSON))
 	if err != nil {
 		return nil, err
 	}
 
-	var respContent Response
-	err = json.Unmarshal(body, &respContent)
-	if err != nil {
-		return nil, err
-	}
-
-	if !respContent.Ok {
-		return nil, fmt.Errorf("error code: %v; description: %s", respContent.ErrorCode, respContent.Description)
-	}
-
-	if respContent.Result == nil {
+	if resp.Result == nil {
 		return []Update{}, nil
 	}
 
-	resultJSON, err := json.Marshal(respContent.Result)
+	resultJSON, err := json.Marshal(resp.Result)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +58,49 @@ func (s *Bot) GetUpdates(offset int64) ([]Update, error) {
 	return result, nil
 }
 
-func (b *Bot) SendMessageWithKeyboard(chatID int64, message string, keyboard ReplyKeyboardMarkup) error {
+func (b *Bot) AnswerCallbackQuery(callbackID string) error {
+	u, err := url.Parse(fmt.Sprintf("%s%s/answerCallbackQuery", baseBotURL, b.Token))
+	if err != nil {
+		return err
+	}
+
+	q := url.Values{}
+	q.Set("callback_query_id", callbackID)
+	u.RawQuery = q.Encode()
+
+	_, err = b.sendGetRequest(u.String())
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (b *Bot) EditMessageText(chatID, messageID int64, text string, keyboard InlineKeyboardMarkup) error {
+	u, err := url.Parse(fmt.Sprintf("%s%s/editMessageText", baseBotURL, b.Token))
+	if err != nil {
+		return err
+	}
+
+	jsonBody, err := json.Marshal(map[string]interface{}{
+		"chat_id":      chatID,
+		"message_id":   messageID,
+		"text":         text,
+		"reply_markup": keyboard,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = b.sendPostRequest(u.String(), "application/json", bytes.NewBuffer(jsonBody))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (b *Bot) SendMessageWithInlineKeyboard(chatID int64, message string, keyboard InlineKeyboardMarkup) error {
 	jsonBody, err := json.Marshal(map[string]interface{}{
 		"chat_id":      chatID,
 		"text":         message,
@@ -84,7 +110,12 @@ func (b *Bot) SendMessageWithKeyboard(chatID int64, message string, keyboard Rep
 		return err
 	}
 
-	err = b.sendMessageJSON(jsonBody)
+	u, err := url.Parse(fmt.Sprintf("%s%s/sendMessage", baseBotURL, b.Token))
+	if err != nil {
+		return err
+	}
+
+	_, err = b.sendPostRequest(u.String(), "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return err
 	}
@@ -94,15 +125,19 @@ func (b *Bot) SendMessageWithKeyboard(chatID int64, message string, keyboard Rep
 
 func (b *Bot) SendMessage(chatID int64, message string) error {
 	jsonBody, err := json.Marshal(map[string]interface{}{
-		"chat_id":      chatID,
-		"text":         message,
-		"reply_markup": ReplyKeyboardRemove{RemoveKeyboard: true},
+		"chat_id": chatID,
+		"text":    message,
 	})
 	if err != nil {
 		return err
 	}
 
-	err = b.sendMessageJSON(jsonBody)
+	u, err := url.Parse(fmt.Sprintf("%s%s/sendMessage", baseBotURL, b.Token))
+	if err != nil {
+		return err
+	}
+
+	_, err = b.sendPostRequest(u.String(), "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return err
 	}
@@ -198,28 +233,12 @@ func (b *Bot) GetFile(fileID string) (File, error) {
 	q.Set("file_id", fileID)
 	u.RawQuery = q.Encode()
 
-	resp, err := http.Get(u.String())
-	if err != nil {
-		return File{}, err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
+	resp, err := b.sendGetRequest(u.String())
 	if err != nil {
 		return File{}, err
 	}
 
-	var respContent Response
-	err = json.Unmarshal(body, &respContent)
-	if err != nil {
-		return File{}, err
-	}
-
-	if !respContent.Ok {
-		return File{}, fmt.Errorf("error code: %v; description: %s", respContent.ErrorCode, respContent.Description)
-	}
-
-	resultJSON, err := json.Marshal(respContent.Result)
+	resultJSON, err := json.Marshal(resp.Result)
 	if err != nil {
 		return File{}, err
 	}
@@ -232,6 +251,7 @@ func (b *Bot) GetFile(fileID string) (File, error) {
 
 	return result, nil
 }
+
 func (s *Bot) DownloadFile(fileID string) ([]byte, error) {
 	file, err := s.GetFile(fileID)
 	if err != nil {
@@ -261,32 +281,52 @@ func (s *Bot) DownloadFile(fileID string) ([]byte, error) {
 	return body, nil
 }
 
-func (b *Bot) sendMessageJSON(jsonBody []byte) error {
-	u, err := url.Parse(fmt.Sprintf("%s%s/sendMessage", baseBotURL, b.Token))
+func (b *Bot) sendPostRequest(url string, contentType string, formBody *bytes.Buffer) (Response, error) {
+	resp, err := http.Post(url, contentType, formBody)
 	if err != nil {
-		return err
-	}
-
-	resp, err := http.Post(u.String(), "application/json", bytes.NewBuffer(jsonBody))
-	if err != nil {
-		return err
+		return Response{}, err
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return err
+		return Response{}, err
 	}
 
 	var respContent Response
 	err = json.Unmarshal(body, &respContent)
 	if err != nil {
-		return err
+		return Response{}, err
 	}
 
 	if !respContent.Ok {
-		return fmt.Errorf("error code: %v; description: %s", respContent.ErrorCode, respContent.Description)
+		return Response{}, fmt.Errorf("error code: %v; description: %s", respContent.ErrorCode, respContent.Description)
 	}
 
-	return nil
+	return respContent, nil
+}
+
+func (b *Bot) sendGetRequest(url string) (Response, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return Response{}, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return Response{}, err
+	}
+
+	var respContent Response
+	err = json.Unmarshal(body, &respContent)
+	if err != nil {
+		return Response{}, err
+	}
+
+	if !respContent.Ok {
+		return Response{}, fmt.Errorf("error code: %v; description: %s", respContent.ErrorCode, respContent.Description)
+	}
+
+	return respContent, nil
 }

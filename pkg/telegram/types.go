@@ -1,19 +1,12 @@
 package telegram
 
-type KeyboardButton struct {
-	Text string `json:"text"`
+type InlineKeyboardButton struct {
+	Text         string `json:"text"`
+	CallbackData string `json:"callback_data"`
 }
 
-type ReplyKeyboardMarkup struct {
-	Keyboard        [][]KeyboardButton `json:"keyboard"`
-	ResizeKeyboard  bool               `json:"resize_keyboard"`
-	OneTimeKeyboard bool               `json:"one_time_keyboard"`
-	Selective       bool               `json:"selective"`
-}
-
-type ReplyKeyboardRemove struct {
-	RemoveKeyboard bool `json:"remove_keyboard"`
-	Selective      bool `json:"selective"`
+type InlineKeyboardMarkup struct {
+	InlineKeyboard [][]InlineKeyboardButton `json:"inline_keyboard"`
 }
 
 type Chat struct {
@@ -60,9 +53,17 @@ type Message struct {
 	Document  Document    `json:"document"`
 }
 
+type CallbackQuery struct {
+	ID      string  `json:"id"`
+	From    User    `json:"from"`
+	Message Message `json:"message"`
+	Data    string  `json:"data"`
+}
+
 type Update struct {
-	UpdateID int64   `json:"update_id"`
-	Message  Message `json:"message"`
+	UpdateID      int64         `json:"update_id"`
+	Message       Message       `json:"message"`
+	CallbackQuery CallbackQuery `json:"callback_query"`
 }
 
 type Response struct {
