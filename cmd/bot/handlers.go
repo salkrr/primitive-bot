@@ -43,7 +43,7 @@ func (app *application) handleMessage(m telegram.Message, out chan operation) {
 			iterations: 100,
 			repeat:     1,
 			alpha:      128,
-			ext:        png,
+			ext:        gif,
 		},
 	}
 	app.bot.SendMessage(m.Chat.ID, messageQueued)
@@ -66,7 +66,7 @@ func (app *application) primitiveWorker(in chan operation) {
 		app.infoLog.Printf("Finished creating primitive from the image '%s'", op.imagePath)
 
 		// send output to the user
-		err = app.bot.SendPhoto(op.chatID, outputPath)
+		err = app.bot.SendDocument(op.chatID, outputPath)
 		if err != nil {
 			app.serverError(op.chatID, err)
 			return
