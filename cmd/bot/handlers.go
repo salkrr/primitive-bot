@@ -113,6 +113,19 @@ func (app *application) handleCallbackQuery(q telegram.CallbackQuery, out chan s
 		s.Config.Extension = primitive.Extension(slug)
 		app.sessions.Set(q.From.ID, s)
 		app.bot.AnswerCallbackQuery(q.ID, fmt.Sprintf("Поменял расширение на %s.", slug))
+
+	case match(q.Data, "/settings/size"):
+		app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, sizeMenu, sizeKeyboard)
+
+	case match(q.Data, "/settings/size/([0-9]+)", &num):
+		// TODO: add symbol to the chosen option
+		if num < 0 || num > 1920 {
+			return
+		}
+
+		s.Config.OutputSize = num
+		app.sessions.Set(q.From.ID, s)
+		app.bot.AnswerCallbackQuery(q.ID, fmt.Sprintf("Поменял размеры изображения на %d.", num))
 	}
 }
 

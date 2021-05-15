@@ -42,7 +42,8 @@ const (
 	iterMenu     = "Выбери количество итераций - шагов, на каждом из которых будет отрисовываться фигуры:"
 	repMenu      = "Выбери сколько фигур будет отрисовываться на каждой итерации:"
 	alphaMenu    = "Выбери значение альфа-канала для каждой фигуры:"
-	extMenu      = "Выберите расширение файла:"
+	extMenu      = "Выбери расширение файла:"
+	sizeMenu     = "Выбери размер для большей стороны изображения (соотношение сторон будет сохранено):"
 )
 
 const (
@@ -54,6 +55,7 @@ const (
 	repButton      = "Повторения"
 	alphaButton    = "Альфа"
 	extButton      = "Расширение"
+	sizeButton     = "Размеры"
 )
 
 var (
@@ -76,6 +78,9 @@ var (
 			{
 				{Text: alphaButton, CallbackData: "/settings/alpha"},
 				{Text: extButton, CallbackData: "/settings/ext"},
+				{Text: sizeButton, CallbackData: "/settings/size"},
+			},
+			{
 				{Text: backButton, CallbackData: "/"},
 			},
 		},
@@ -106,6 +111,9 @@ var (
 			{
 				{Text: "800", CallbackData: "/settings/iter/800"},
 				{Text: "1000", CallbackData: "/settings/iter/1000"},
+				{Text: "2000", CallbackData: "/settings/iter/2000"},
+			},
+			{
 				{Text: backButton, CallbackData: "/settings"},
 			},
 		},
@@ -150,6 +158,24 @@ var (
 				{Text: "png", CallbackData: "/settings/ext/png"},
 				{Text: "svg", CallbackData: "/settings/ext/svg"},
 				{Text: "gif", CallbackData: "/settings/ext/gif"},
+			},
+			{
+				{Text: backButton, CallbackData: "/settings"},
+			},
+		},
+	}
+
+	sizeKeyboard = telegram.InlineKeyboardMarkup{
+		InlineKeyboard: [][]telegram.InlineKeyboardButton{
+			{
+				{Text: "256", CallbackData: "/settings/size/256"},
+				{Text: "512", CallbackData: "/settings/size/512"},
+				{Text: "720", CallbackData: "/settings/size/720"},
+			},
+			{
+				{Text: "1024", CallbackData: "/settings/size/1024"},
+				{Text: "1280", CallbackData: "/settings/size/1280"},
+				{Text: "1920", CallbackData: "/settings/size/1920"},
 			},
 			{
 				{Text: backButton, CallbackData: "/settings"},

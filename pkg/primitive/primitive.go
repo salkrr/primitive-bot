@@ -36,7 +36,7 @@ type Config struct {
 func NewConfig() Config {
 	return Config{
 		workers:    runtime.NumCPU(),
-		OutputSize: 1024,
+		OutputSize: 1280,
 		Shape:      ShapeAny,
 		Iterations: 200,
 		Repeat:     1,
