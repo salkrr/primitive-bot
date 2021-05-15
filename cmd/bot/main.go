@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/lazy-void/primitive-bot/pkg/sessions"
 	"github.com/lazy-void/primitive-bot/pkg/telegram"
 )
 
@@ -12,6 +13,7 @@ type application struct {
 	infoLog  *log.Logger
 	errorLog *log.Logger
 	bot      *telegram.Bot
+	sessions *sessions.ActiveSessions
 }
 
 func main() {
@@ -29,6 +31,7 @@ func main() {
 		infoLog:  infoLog,
 		errorLog: errorLog,
 		bot:      &telegram.Bot{Token: *token},
+		sessions: sessions.New(),
 	}
 
 	infoLog.Printf("Starting to listen for updates...")
@@ -37,7 +40,7 @@ func main() {
 
 func (app *application) listenAndServe() {
 	// create worker
-	ch := make(chan operation, 100)
+	ch := make(chan sessions.Session, 100)
 	go app.primitiveWorker(ch)
 
 	offset := int64(0)
@@ -47,7 +50,6 @@ func (app *application) listenAndServe() {
 			app.errorLog.Print(err)
 			continue
 		}
-		app.infoLog.Printf("Got updates: %v", updates)
 
 		numUpdates := len(updates)
 		if numUpdates == 0 {
@@ -55,7 +57,15 @@ func (app *application) listenAndServe() {
 		}
 
 		for _, u := range updates {
-			go app.handleMessage(u.Message, ch)
+			if u.Message.MessageID > 0 {
+				app.infoLog.Printf("Got message with text '%s' from the user '%s' with ID '%d'",
+					u.Message.Text, u.Message.From.FirstName, u.Message.From.ID)
+				go app.handleMessage(u.Message, ch)
+			} else if u.CallbackQuery.ID != "" {
+				app.infoLog.Printf("Got callback query with data '%s' from the user '%s' with ID '%d'",
+					u.CallbackQuery.Data, u.CallbackQuery.From.FirstName, u.CallbackQuery.From.ID)
+				go app.handleCallbackQuery(u.CallbackQuery, ch)
+			}
 		}
 
 		offset = updates[numUpdates-1].UpdateID + 1

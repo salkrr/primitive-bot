@@ -58,7 +58,7 @@ func (b *Bot) GetUpdates(offset int64) ([]Update, error) {
 	return result, nil
 }
 
-func (b *Bot) AnswerCallbackQuery(callbackID string) error {
+func (b *Bot) AnswerCallbackQuery(callbackID, text string) error {
 	u, err := url.Parse(fmt.Sprintf("%s%s/answerCallbackQuery", baseBotURL, b.Token))
 	if err != nil {
 		return err
@@ -66,6 +66,7 @@ func (b *Bot) AnswerCallbackQuery(callbackID string) error {
 
 	q := url.Values{}
 	q.Set("callback_query_id", callbackID)
+	q.Set("text", text)
 	u.RawQuery = q.Encode()
 
 	_, err = b.sendGetRequest(u.String())
