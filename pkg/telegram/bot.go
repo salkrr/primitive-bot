@@ -101,27 +101,38 @@ func (b *Bot) EditMessageText(chatID, messageID int64, text string, keyboard Inl
 	return nil
 }
 
-func (b *Bot) SendMessageWithInlineKeyboard(chatID int64, message string, keyboard InlineKeyboardMarkup) error {
+func (b *Bot) SendMessageWithInlineKeyboard(chatID int64, message string, keyboard InlineKeyboardMarkup) (Message, error) {
 	jsonBody, err := json.Marshal(map[string]interface{}{
 		"chat_id":      chatID,
 		"text":         message,
 		"reply_markup": keyboard,
 	})
 	if err != nil {
-		return err
+		return Message{}, err
 	}
 
 	u, err := url.Parse(fmt.Sprintf("%s%s/sendMessage", baseBotURL, b.Token))
 	if err != nil {
-		return err
+		return Message{}, err
 	}
 
-	_, err = b.sendPostRequest(u.String(), "application/json", bytes.NewBuffer(jsonBody))
+	resp, err := b.sendPostRequest(u.String(), "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
-		return err
+		return Message{}, err
 	}
 
-	return nil
+	resultJSON, err := json.Marshal(resp.Result)
+	if err != nil {
+		return Message{}, err
+	}
+
+	var result Message
+	err = json.Unmarshal(resultJSON, &result)
+	if err != nil {
+		return Message{}, err
+	}
+
+	return result, nil
 }
 
 func (b *Bot) SendMessage(chatID int64, message string) error {

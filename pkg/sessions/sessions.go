@@ -10,10 +10,10 @@ import (
 var ErrNoSession = errors.New("session doesn't exist")
 
 type Session struct {
-	ChatID       int64
-	ImgMessageID int64
-	ImgPath      string
-	Config       primitive.Config
+	ChatID        int64
+	MenuMessageID int64
+	ImgPath       string
+	Config        primitive.Config
 }
 
 type ActiveSessions struct {

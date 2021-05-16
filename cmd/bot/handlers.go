@@ -21,6 +21,18 @@ func (app *application) handleMessage(m telegram.Message, out chan sessions.Sess
 		return
 	}
 
+	// If we already have session - delete it's menu
+	s, err := app.sessions.Get(m.From.ID)
+	if err == nil {
+		if err = app.bot.DeleteMessage(s.ChatID, s.MenuMessageID); err != nil {
+			app.serverError(m.Chat.ID, err)
+			return
+		}
+	} else if err != sessions.ErrNoSession {
+		app.serverError(m.Chat.ID, err)
+		return
+	}
+
 	// Download image
 	file := m.Photo[2]
 	img, err := app.bot.DownloadFile(file.FileID)
@@ -32,13 +44,18 @@ func (app *application) handleMessage(m telegram.Message, out chan sessions.Sess
 	os.WriteFile(path, img, 0644)
 
 	// Create session
+	msg, err := app.bot.SendMessageWithInlineKeyboard(m.Chat.ID, rootMenu, rootKeyboard)
+	if err != nil {
+		app.serverError(m.Chat.ID, err)
+		return
+	}
+
 	app.sessions.Set(m.From.ID, sessions.Session{
-		ChatID:       m.Chat.ID,
-		ImgMessageID: m.MessageID,
-		ImgPath:      path,
-		Config:       primitive.NewConfig(),
+		ChatID:        m.Chat.ID,
+		MenuMessageID: msg.MessageID,
+		ImgPath:       path,
+		Config:        primitive.NewConfig(),
 	})
-	app.bot.SendMessageWithInlineKeyboard(m.Chat.ID, rootMenu, rootKeyboard)
 }
 
 func (app *application) handleCallbackQuery(q telegram.CallbackQuery, out chan sessions.Session) {
