@@ -224,6 +224,25 @@ func (b *Bot) SendDocument(chatID int64, documentPath string) error {
 	return nil
 }
 
+func (b *Bot) DeleteMessage(chatID, messageID int64) error {
+	u, err := url.Parse(fmt.Sprintf("%s%s/deleteMessage", baseBotURL, b.Token))
+	if err != nil {
+		return err
+	}
+
+	q := url.Values{}
+	q.Set("chat_id", fmt.Sprint(chatID))
+	q.Set("message_id", fmt.Sprint(messageID))
+	u.RawQuery = q.Encode()
+
+	_, err = b.sendGetRequest(u.String())
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (b *Bot) GetFile(fileID string) (File, error) {
 	u, err := url.Parse(fmt.Sprintf("%s%s/getFile", baseBotURL, b.Token))
 	if err != nil {
