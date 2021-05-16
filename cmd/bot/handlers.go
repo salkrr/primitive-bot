@@ -60,7 +60,10 @@ func (app *application) handleCallbackQuery(q telegram.CallbackQuery, out chan s
 	case match(q.Data, "/start"):
 		out <- s
 		app.sessions.Delete(q.From.ID)
-		app.bot.AnswerCallbackQuery(q.ID, queuedMessage)
+		app.bot.DeleteMessage(q.Message.Chat.ID, q.Message.MessageID)
+		app.bot.SendMessage(q.Message.Chat.ID, fmt.Sprintf(enqueuedMessage,
+			strings.ToLower(shapeNames[s.Config.Shape]), s.Config.Iterations,
+			s.Config.Repeat, s.Config.Alpha, s.Config.Extension, s.Config.OutputSize))
 
 	case match(q.Data, "/settings"):
 		app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, settingsMenu, settingsKeyboard)
