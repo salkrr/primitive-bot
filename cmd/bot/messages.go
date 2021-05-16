@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/lazy-void/primitive-bot/pkg/primitive"
 	"github.com/lazy-void/primitive-bot/pkg/telegram"
 )
@@ -33,46 +35,49 @@ const (
 	helpMessage     = "Отправь мне какую-нибудь фотографию."
 	errorMessage    = "Что-то пошло не так! Попробуй снова через пару минут."
 	enqueuedMessage = "Добавил в очередь.\nФигуры: %s\nИтерации: %d\nПовторения: %d\nАльфа-канал: %d\nРасширение: %s\nРазмеры: %d"
+	inputMessage    = "Неверное значение!\nВведи число от %d до %d:"
 )
 
 const (
-	rootMenu     = "Меню:"
-	settingsMenu = "Настройки:"
-	shapesMenu   = "Выбери фигуры, из которых будет выстраиваться изображение:"
-	iterMenu     = "Выбери количество итераций - шагов, на каждом из которых будет отрисовываться фигуры:"
-	repMenu      = "Выбери сколько фигур будет отрисовываться на каждой итерации:"
-	alphaMenu    = "Выбери значение альфа-канала каждой отрисовываемой фигуры:"
-	extMenu      = "Выбери расширение файла:"
-	sizeMenu     = "Выбери размер для большей стороны изображения (соотношение сторон будет сохранено):"
+	rootMenuText     = "Меню:"
+	settingsMenuText = "Настройки:"
+	shapesMenuText   = "Выбери фигуры, из которых будет выстраиваться изображение:"
+	iterMenuText     = "Выбери количество итераций - шагов, на каждом из которых будет отрисовываться фигуры:"
+	repMenuText      = "Выбери сколько фигур будет отрисовываться на каждой итерации:"
+	alphaMenuText    = "Выбери значение альфа-канала каждой отрисовываемой фигуры:"
+	extMenuText      = "Выбери расширение файла:"
+	sizeMenuText     = "Выбери размер для большей стороны изображения (соотношение сторон будет сохранено):"
 )
 
 const (
-	startButton    = "Начать"
-	settingsButton = "Настройки"
-	backButton     = "Назад"
-	shapesButton   = "Фигуры"
-	iterButton     = "Итерации"
-	repButton      = "Повторения"
-	alphaButton    = "Альфа"
-	extButton      = "Расширение"
-	sizeButton     = "Размеры"
+	startButtonText    = "Начать"
+	settingsButtonText = "Настройки"
+	backButtonText     = "Назад"
+	shapesButtonText   = "Фигуры"
+	iterButtonText     = "Итерации"
+	repButtonText      = "Повторения"
+	alphaButtonText    = "Альфа"
+	extButtonText      = "Расширение"
+	sizeButtonText     = "Размеры"
 )
 
 var (
 	rootKeyboard = telegram.InlineKeyboardMarkup{
 		InlineKeyboard: [][]telegram.InlineKeyboardButton{
 			{
-				{Text: startButton, CallbackData: "/start"},
+				{Text: startButtonText, CallbackData: "/start"},
 			},
 			{
-				{Text: shapesButton, CallbackData: "/settings/shape"},
-				{Text: iterButton, CallbackData: "/settings/iter"},
-				{Text: repButton, CallbackData: "/settings/rep"},
+				{Text: shapesButtonText, CallbackData: "/settings/shape"},
+				{Text: iterButtonText, CallbackData: "/settings/iter"},
 			},
 			{
-				{Text: alphaButton, CallbackData: "/settings/alpha"},
-				{Text: extButton, CallbackData: "/settings/ext"},
-				{Text: sizeButton, CallbackData: "/settings/size"},
+				{Text: repButtonText, CallbackData: "/settings/rep"},
+				{Text: alphaButtonText, CallbackData: "/settings/alpha"},
+			},
+			{
+				{Text: extButtonText, CallbackData: "/settings/ext"},
+				{Text: sizeButtonText, CallbackData: "/settings/size"},
 			},
 		},
 	}
@@ -88,7 +93,7 @@ var (
 			{{Text: bezierCurves, CallbackData: "/settings/shape/6"}},
 			{{Text: rotatedEllipses, CallbackData: "/settings/shape/7"}},
 			{{Text: quadrilaterals, CallbackData: "/settings/shape/8"}},
-			{{Text: backButton, CallbackData: "/"}},
+			{{Text: backButtonText, CallbackData: "/"}},
 		},
 	}
 
@@ -105,8 +110,10 @@ var (
 				{Text: "2000", CallbackData: "/settings/iter/2000"},
 			},
 			{
-				{Text: "Другое", CallbackData: "/settings/iter/diff"},
-				{Text: backButton, CallbackData: "/"},
+				{Text: "Другое", CallbackData: "/settings/iter/input"},
+			},
+			{
+				{Text: backButtonText, CallbackData: "/"},
 			},
 		},
 	}
@@ -124,7 +131,7 @@ var (
 				{Text: "6", CallbackData: "/settings/rep/6"},
 			},
 			{
-				{Text: backButton, CallbackData: "/"},
+				{Text: backButtonText, CallbackData: "/"},
 			},
 		},
 	}
@@ -141,8 +148,10 @@ var (
 				{Text: "255", CallbackData: "/settings/alpha/255"},
 			},
 			{
-				{Text: "Другое", CallbackData: "/settings/alpha/diff"},
-				{Text: backButton, CallbackData: "/"},
+				{Text: "Другое", CallbackData: "/settings/alpha/input"},
+			},
+			{
+				{Text: backButtonText, CallbackData: "/"},
 			},
 		},
 	}
@@ -156,7 +165,7 @@ var (
 				{Text: "gif", CallbackData: "/settings/ext/gif"},
 			},
 			{
-				{Text: backButton, CallbackData: "/"},
+				{Text: backButtonText, CallbackData: "/"},
 			},
 		},
 	}
@@ -174,9 +183,39 @@ var (
 				{Text: "1920", CallbackData: "/settings/size/1920"},
 			},
 			{
-				{Text: "Другое", CallbackData: "/settings/size/diff"},
-				{Text: backButton, CallbackData: "/"},
+				{Text: "Другое", CallbackData: "/settings/size/input"},
+			},
+			{
+				{Text: backButtonText, CallbackData: "/"},
 			},
 		},
 	}
 )
+
+// newKeyboardFromTemplate creates new keyboard from the template
+// adding symbol to the option that is chosen at the moment
+func newKeyboardFromTemplate(
+	template telegram.InlineKeyboardMarkup,
+	optionCallback,
+	newText string,
+) telegram.InlineKeyboardMarkup {
+	checkSymbol := "👉"
+	newKeyboard := telegram.InlineKeyboardMarkup{}
+	newKeyboard.InlineKeyboard = make([][]telegram.InlineKeyboardButton, len(template.InlineKeyboard))
+	for i, row := range template.InlineKeyboard {
+		newKeyboard.InlineKeyboard[i] = make([]telegram.InlineKeyboardButton, len(row))
+		for j, button := range row {
+			newKeyboard.InlineKeyboard[i][j] = button
+
+			if button.CallbackData == optionCallback {
+				if newText == "" {
+					newText = button.Text
+				}
+
+				newKeyboard.InlineKeyboard[i][j].Text = fmt.Sprintf("%s %s", checkSymbol, newText)
+			}
+		}
+	}
+
+	return newKeyboard
+}
