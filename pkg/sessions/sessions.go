@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/lazy-void/primitive-bot/pkg/primitive"
+	"github.com/lazy-void/primitive-bot/pkg/telegram"
 )
 
 var ErrNoSession = errors.New("session doesn't exist")
@@ -12,6 +13,7 @@ var ErrNoSession = errors.New("session doesn't exist")
 type Session struct {
 	ChatID        int64
 	MenuMessageID int64
+	InputChannel  chan telegram.Message
 	ImgPath       string
 	Config        primitive.Config
 }
@@ -34,16 +36,16 @@ func (as *ActiveSessions) Set(userID int64, s Session) {
 	as.data[userID] = s
 }
 
-func (as *ActiveSessions) Get(userID int64) (Session, error) {
+func (as *ActiveSessions) Get(userID int64) (Session, bool) {
 	as.mu.Lock()
 	defer as.mu.Unlock()
 
 	s, ok := as.data[userID]
 	if !ok {
-		return Session{}, ErrNoSession
+		return Session{}, false
 	}
 
-	return s, nil
+	return s, true
 }
 
 func (as *ActiveSessions) Delete(userID int64) {

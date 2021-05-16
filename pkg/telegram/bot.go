@@ -77,7 +77,7 @@ func (b *Bot) AnswerCallbackQuery(callbackID, text string) error {
 	return nil
 }
 
-func (b *Bot) EditMessageText(chatID, messageID int64, text string, keyboard InlineKeyboardMarkup) error {
+func (b *Bot) EditMessageTextWithKeyboard(chatID, messageID int64, text string, keyboard InlineKeyboardMarkup) error {
 	u, err := url.Parse(fmt.Sprintf("%s%s/editMessageText", baseBotURL, b.Token))
 	if err != nil {
 		return err
@@ -88,6 +88,29 @@ func (b *Bot) EditMessageText(chatID, messageID int64, text string, keyboard Inl
 		"message_id":   messageID,
 		"text":         text,
 		"reply_markup": keyboard,
+	})
+	if err != nil {
+		return err
+	}
+
+	_, err = b.sendPostRequest(u.String(), "application/json", bytes.NewBuffer(jsonBody))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (b *Bot) EditMessageText(chatID, messageID int64, text string) error {
+	u, err := url.Parse(fmt.Sprintf("%s%s/editMessageText", baseBotURL, b.Token))
+	if err != nil {
+		return err
+	}
+
+	jsonBody, err := json.Marshal(map[string]interface{}{
+		"chat_id":    chatID,
+		"message_id": messageID,
+		"text":       text,
 	})
 	if err != nil {
 		return err

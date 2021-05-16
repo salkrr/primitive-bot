@@ -105,6 +105,7 @@ var (
 				{Text: "2000", CallbackData: "/settings/iter/2000"},
 			},
 			{
+				{Text: "Другое", CallbackData: "/settings/iter/diff"},
 				{Text: backButton, CallbackData: "/"},
 			},
 		},
@@ -140,6 +141,7 @@ var (
 				{Text: "255", CallbackData: "/settings/alpha/255"},
 			},
 			{
+				{Text: "Другое", CallbackData: "/settings/alpha/diff"},
 				{Text: backButton, CallbackData: "/"},
 			},
 		},
@@ -172,6 +174,7 @@ var (
 				{Text: "1920", CallbackData: "/settings/size/1920"},
 			},
 			{
+				{Text: "Другое", CallbackData: "/settings/size/diff"},
 				{Text: backButton, CallbackData: "/"},
 			},
 		},

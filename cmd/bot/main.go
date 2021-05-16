@@ -53,6 +53,7 @@ func (app *application) listenAndServe() {
 
 		numUpdates := len(updates)
 		if numUpdates == 0 {
+			app.infoLog.Printf("No updates.")
 			continue
 		}
 

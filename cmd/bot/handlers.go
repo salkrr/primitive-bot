@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -14,6 +15,14 @@ import (
 
 func (app *application) handleMessage(m telegram.Message, out chan sessions.Session) {
 	if m.Photo == nil {
+		// Handle user input if they are inside input form
+		s, ok := app.sessions.Get(m.From.ID)
+		if ok && s.InputChannel != nil {
+			s.InputChannel <- m
+			return
+		}
+
+		// Send help message
 		err := app.bot.SendMessage(m.Chat.ID, helpMessage)
 		if err != nil {
 			app.serverError(m.Chat.ID, err)
@@ -22,15 +31,13 @@ func (app *application) handleMessage(m telegram.Message, out chan sessions.Sess
 	}
 
 	// If we already have session - delete it's menu
-	s, err := app.sessions.Get(m.From.ID)
-	if err == nil {
-		if err = app.bot.DeleteMessage(s.ChatID, s.MenuMessageID); err != nil {
+	s, ok := app.sessions.Get(m.From.ID)
+	if ok {
+		err := app.bot.DeleteMessage(s.ChatID, s.MenuMessageID)
+		if err != nil {
 			app.serverError(m.Chat.ID, err)
 			return
 		}
-	} else if err != sessions.ErrNoSession {
-		app.serverError(m.Chat.ID, err)
-		return
 	}
 
 	// Download image
@@ -49,10 +56,10 @@ func (app *application) handleMessage(m telegram.Message, out chan sessions.Sess
 		app.serverError(m.Chat.ID, err)
 		return
 	}
-
 	app.sessions.Set(m.From.ID, sessions.Session{
 		ChatID:        m.Chat.ID,
 		MenuMessageID: msg.MessageID,
+		InputChannel:  nil,
 		ImgPath:       path,
 		Config:        primitive.NewConfig(),
 	})
@@ -61,18 +68,18 @@ func (app *application) handleMessage(m telegram.Message, out chan sessions.Sess
 func (app *application) handleCallbackQuery(q telegram.CallbackQuery, out chan sessions.Session) {
 	defer app.bot.AnswerCallbackQuery(q.ID, "")
 
-	s, err := app.sessions.Get(q.From.ID)
-	if err == sessions.ErrNoSession {
+	s, ok := app.sessions.Get(q.From.ID)
+	if !ok {
+		// Remove keyboard of an invalid session
+		app.bot.DeleteMessage(q.Message.Chat.ID, q.Message.MessageID)
 		return
-	} else if err != nil {
-		app.serverError(q.Message.Chat.ID, err)
 	}
 
 	var num int
 	var slug string
 	switch {
 	case match(q.Data, "/"):
-		app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, rootMenu, rootKeyboard)
+		app.bot.EditMessageTextWithKeyboard(q.Message.Chat.ID, q.Message.MessageID, rootMenu, rootKeyboard)
 	case match(q.Data, "/start"):
 		app.sessions.Delete(q.From.ID)
 		app.bot.DeleteMessage(q.Message.Chat.ID, q.Message.MessageID)
@@ -82,28 +89,50 @@ func (app *application) handleCallbackQuery(q telegram.CallbackQuery, out chan s
 
 		out <- s
 	case match(q.Data, "/settings/shape"):
-		app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, shapesMenu, shapesKeyboard)
+		app.bot.EditMessageTextWithKeyboard(q.Message.Chat.ID, q.Message.MessageID, shapesMenu, shapesKeyboard)
 	case match(q.Data, "/settings/shape/([0-8])", &num):
 		// TODO: add symbol to the chosen option
 		s.Config.Shape = primitive.Shape(num)
 		app.sessions.Set(q.From.ID, s)
 		app.bot.AnswerCallbackQuery(q.ID, fmt.Sprintf("Будут использоваться фигуры: %s.", strings.ToLower(shapeNames[primitive.Shape(num)])))
 	case match(q.Data, "/settings/iter"):
-		app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, iterMenu, iterKeyboard)
+		app.bot.EditMessageTextWithKeyboard(q.Message.Chat.ID, q.Message.MessageID, iterMenu, iterKeyboard)
 	case match(q.Data, "/settings/iter/([0-9]+)", &num):
 		// TODO: add symbol to the chosen option
+		if num > 10000 {
+			return
+		}
+
 		s.Config.Iterations = num
 		app.sessions.Set(q.From.ID, s)
 		app.bot.AnswerCallbackQuery(q.ID, fmt.Sprintf("Поменял количество итераций на %d.", num))
+	case match(q.Data, "/settings/iter/diff"):
+		in := make(chan telegram.Message)
+		out := make(chan int)
+
+		// Get user input
+		s.InputChannel = in
+		app.sessions.Set(q.From.ID, s)
+		go app.getInputFromUser(
+			q.Message.Chat.ID, q.Message.MessageID, 1, 5000,
+			iterMenu, iterKeyboard, in, out,
+		)
+
+		s.Config.Iterations = <-out
+		s.InputChannel = nil
+		app.sessions.Set(q.From.ID, s)
+		close(in)
+
+		app.bot.AnswerCallbackQuery(q.ID, fmt.Sprintf("Поменял количество итераций на %d.", s.Config.Iterations))
 	case match(q.Data, "/settings/rep"):
-		app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, repMenu, repKeyboard)
+		app.bot.EditMessageTextWithKeyboard(q.Message.Chat.ID, q.Message.MessageID, repMenu, repKeyboard)
 	case match(q.Data, "/settings/rep/([1-6])", &num):
 		// TODO: add symbol to the chosen option
 		s.Config.Repeat = num
 		app.sessions.Set(q.From.ID, s)
 		app.bot.AnswerCallbackQuery(q.ID, fmt.Sprintf("Поменял количество повторений на %d.", num))
 	case match(q.Data, "/settings/alpha"):
-		app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, alphaMenu, alphaKeyboard)
+		app.bot.EditMessageTextWithKeyboard(q.Message.Chat.ID, q.Message.MessageID, alphaMenu, alphaKeyboard)
 	case match(q.Data, "/settings/alpha/([0-9]+)", &num):
 		// TODO: add symbol to the chosen option
 		if num < 0 || num > 255 {
@@ -113,24 +142,105 @@ func (app *application) handleCallbackQuery(q telegram.CallbackQuery, out chan s
 		s.Config.Alpha = num
 		app.sessions.Set(q.From.ID, s)
 		app.bot.AnswerCallbackQuery(q.ID, fmt.Sprintf("Поменял значение альфа-канала на %d.", num))
+	case match(q.Data, "/settings/alpha/diff"):
+		in := make(chan telegram.Message)
+		out := make(chan int)
+
+		// Get user input
+		s.InputChannel = in
+		app.sessions.Set(q.From.ID, s)
+		go app.getInputFromUser(
+			q.Message.Chat.ID, q.Message.MessageID, 1, 255,
+			alphaMenu, alphaKeyboard, in, out,
+		)
+
+		s.Config.Alpha = <-out
+		s.InputChannel = nil
+		app.sessions.Set(q.From.ID, s)
+		close(in)
+
+		app.bot.AnswerCallbackQuery(q.ID, fmt.Sprintf("Поменял значение альфа-канала на %d.", s.Config.Alpha))
 	case match(q.Data, "/settings/ext"):
-		app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, extMenu, extKeyboard)
+		app.bot.EditMessageTextWithKeyboard(q.Message.Chat.ID, q.Message.MessageID, extMenu, extKeyboard)
 	case match(q.Data, "/settings/ext/(jpg|png|svg|gif)", &slug):
 		// TODO: add symbol to the chosen option
 		s.Config.Extension = primitive.Extension(slug)
 		app.sessions.Set(q.From.ID, s)
 		app.bot.AnswerCallbackQuery(q.ID, fmt.Sprintf("Поменял расширение на %s.", slug))
 	case match(q.Data, "/settings/size"):
-		app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, sizeMenu, sizeKeyboard)
+		app.bot.EditMessageTextWithKeyboard(q.Message.Chat.ID, q.Message.MessageID, sizeMenu, sizeKeyboard)
 	case match(q.Data, "/settings/size/([0-9]+)", &num):
 		// TODO: add symbol to the chosen option
-		if num < 0 || num > 1920 {
+		if num < 256 || num > 1920 {
 			return
 		}
 
 		s.Config.OutputSize = num
 		app.sessions.Set(q.From.ID, s)
 		app.bot.AnswerCallbackQuery(q.ID, fmt.Sprintf("Поменял размеры изображения на %d.", num))
+	case match(q.Data, "/settings/size/diff"):
+		in := make(chan telegram.Message)
+		out := make(chan int)
+
+		// Get user input
+		s.InputChannel = in
+		app.sessions.Set(q.From.ID, s)
+		go app.getInputFromUser(
+			q.Message.Chat.ID, q.Message.MessageID, 256, 3840,
+			sizeMenu, sizeKeyboard, in, out,
+		)
+
+		s.Config.OutputSize = <-out
+		s.InputChannel = nil
+		app.sessions.Set(q.From.ID, s)
+		close(in)
+
+		app.bot.AnswerCallbackQuery(q.ID, fmt.Sprintf("Поменял размеры изображения на %d.", s.Config.OutputSize))
+	}
+}
+
+func (app *application) getInputFromUser(
+	chatID, menuMessageID int64,
+	min, max int,
+	backMenu string,
+	backKeyboard telegram.InlineKeyboardMarkup,
+	in chan telegram.Message,
+	out chan int,
+) {
+	err := app.bot.EditMessageText(chatID, menuMessageID,
+		fmt.Sprintf("Введи число от %d до %d:", min, max))
+	if err != nil {
+		app.serverError(chatID, err)
+		return
+	}
+
+	for {
+		userMsg := <-in
+		app.bot.DeleteMessage(userMsg.Chat.ID, userMsg.MessageID)
+		userInput, err := strconv.Atoi(userMsg.Text)
+		app.bot.DeleteMessage(userMsg.Chat.ID, userMsg.MessageID)
+		if err == nil && userInput >= min && userInput <= max {
+			out <- userInput
+			close(out)
+			err = app.bot.EditMessageTextWithKeyboard(chatID, menuMessageID, backMenu, backKeyboard)
+			if err != nil {
+				app.serverError(chatID, err)
+				return
+			}
+			return
+		}
+
+		err = app.bot.EditMessageText(chatID, menuMessageID,
+			fmt.Sprintf("Неверное значение!\nВведи число от %d до %d:", min, max))
+		if err != nil {
+			if strings.Contains(err.Error(), "400") {
+				// 400 error: message is not modified
+				// and we don't care in this case
+				continue
+			}
+			app.serverError(chatID, err)
+			return
+		}
 	}
 }
 
