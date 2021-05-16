@@ -28,8 +28,12 @@ func main() {
 		log.Fatal("You need to provide the token for the Telegram Bot!")
 	}
 
-	os.Mkdir(*inDir, 0664)
-	os.Mkdir(*outDir, 0664)
+	if err := os.MkdirAll(*inDir, 0664); err != nil {
+		log.Fatal(err)
+	}
+	if err := os.MkdirAll(*outDir, 0664); err != nil {
+		log.Fatal(err)
+	}
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
