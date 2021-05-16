@@ -56,45 +56,37 @@ func (app *application) handleCallbackQuery(q telegram.CallbackQuery, out chan s
 	switch {
 	case match(q.Data, "/"):
 		app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, rootMenu, rootKeyboard)
-
 	case match(q.Data, "/start"):
-		out <- s
 		app.sessions.Delete(q.From.ID)
 		app.bot.DeleteMessage(q.Message.Chat.ID, q.Message.MessageID)
 		app.bot.SendMessage(q.Message.Chat.ID, fmt.Sprintf(enqueuedMessage,
 			strings.ToLower(shapeNames[s.Config.Shape]), s.Config.Iterations,
 			s.Config.Repeat, s.Config.Alpha, s.Config.Extension, s.Config.OutputSize))
 
+		out <- s
 	case match(q.Data, "/settings/shape"):
 		app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, shapesMenu, shapesKeyboard)
-
 	case match(q.Data, "/settings/shape/([0-8])", &num):
 		// TODO: add symbol to the chosen option
 		s.Config.Shape = primitive.Shape(num)
 		app.sessions.Set(q.From.ID, s)
 		app.bot.AnswerCallbackQuery(q.ID, fmt.Sprintf("Будут использоваться фигуры: %s.", strings.ToLower(shapeNames[primitive.Shape(num)])))
-
 	case match(q.Data, "/settings/iter"):
 		app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, iterMenu, iterKeyboard)
-
 	case match(q.Data, "/settings/iter/([0-9]+)", &num):
 		// TODO: add symbol to the chosen option
 		s.Config.Iterations = num
 		app.sessions.Set(q.From.ID, s)
 		app.bot.AnswerCallbackQuery(q.ID, fmt.Sprintf("Поменял количество итераций на %d.", num))
-
 	case match(q.Data, "/settings/rep"):
 		app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, repMenu, repKeyboard)
-
 	case match(q.Data, "/settings/rep/([1-6])", &num):
 		// TODO: add symbol to the chosen option
 		s.Config.Repeat = num
 		app.sessions.Set(q.From.ID, s)
 		app.bot.AnswerCallbackQuery(q.ID, fmt.Sprintf("Поменял количество повторений на %d.", num))
-
 	case match(q.Data, "/settings/alpha"):
 		app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, alphaMenu, alphaKeyboard)
-
 	case match(q.Data, "/settings/alpha/([0-9]+)", &num):
 		// TODO: add symbol to the chosen option
 		if num < 0 || num > 255 {
@@ -104,19 +96,15 @@ func (app *application) handleCallbackQuery(q telegram.CallbackQuery, out chan s
 		s.Config.Alpha = num
 		app.sessions.Set(q.From.ID, s)
 		app.bot.AnswerCallbackQuery(q.ID, fmt.Sprintf("Поменял значение альфа-канала на %d.", num))
-
 	case match(q.Data, "/settings/ext"):
 		app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, extMenu, extKeyboard)
-
 	case match(q.Data, "/settings/ext/(jpg|png|svg|gif)", &slug):
 		// TODO: add symbol to the chosen option
 		s.Config.Extension = primitive.Extension(slug)
 		app.sessions.Set(q.From.ID, s)
 		app.bot.AnswerCallbackQuery(q.ID, fmt.Sprintf("Поменял расширение на %s.", slug))
-
 	case match(q.Data, "/settings/size"):
 		app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, sizeMenu, sizeKeyboard)
-
 	case match(q.Data, "/settings/size/([0-9]+)", &num):
 		// TODO: add symbol to the chosen option
 		if num < 0 || num > 1920 {
