@@ -47,7 +47,7 @@ func (app *application) handleMessage(m telegram.Message, out chan sessions.Sess
 		app.serverError(m.Chat.ID, fmt.Errorf("couldn't download image: %s", err))
 		return
 	}
-	path := fmt.Sprintf("./inputs/%s.jpg", file.FileUniqueID)
+	path := fmt.Sprintf("%s/%s.jpg", app.inDir, file.FileUniqueID)
 	os.WriteFile(path, img, 0644)
 
 	// Create session
@@ -255,7 +255,7 @@ func (app *application) primitiveWorker(in chan sessions.Session) {
 			s.ImgPath, s.ChatID, s.Config.Iterations, s.Config.Shape, s.Config.Alpha, s.Config.Repeat, s.Config.OutputSize, s.Config.Extension)
 
 		// create primitive
-		outputPath := fmt.Sprintf("./outputs/%d_%d.%s", s.ChatID, time.Now().Unix(), s.Config.Extension)
+		outputPath := fmt.Sprintf("%s/%d_%d.%s", app.outDir, s.ChatID, time.Now().Unix(), s.Config.Extension)
 		err := s.Config.Create(s.ImgPath, outputPath)
 		if err != nil {
 			app.serverError(s.ChatID, err)
