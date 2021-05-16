@@ -40,15 +40,28 @@ func (app *application) handleMessage(m telegram.Message, out chan sessions.Sess
 		}
 	}
 
-	// Download image
-	file := m.Photo[2]
-	img, err := app.bot.DownloadFile(file.FileID)
-	if err != nil {
-		app.serverError(m.Chat.ID, fmt.Errorf("couldn't download image: %s", err))
+	// Choose smallest image with dimensions >= 256
+	var file telegram.PhotoSize
+	for _, photo := range m.Photo {
+		if photo.Width >= 256 && photo.Height >= 256 {
+			file = photo
+			break
+		}
+	}
+	if file.FileID == "" {
+		app.serverError(m.Chat.ID, fmt.Errorf("no image with dimensions >= 256 in %v", m.Photo))
 		return
 	}
+
 	path := fmt.Sprintf("%s/%s.jpg", app.inDir, file.FileUniqueID)
-	os.WriteFile(path, img, 0644)
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		img, err := app.bot.DownloadFile(file.FileID)
+		if err != nil {
+			app.serverError(m.Chat.ID, fmt.Errorf("couldn't download image: %s", err))
+			return
+		}
+		os.WriteFile(path, img, 0644)
+	}
 
 	// Create session
 	msg, err := app.bot.SendMessageWithInlineKeyboard(m.Chat.ID, rootMenu, rootKeyboard)
