@@ -63,13 +63,7 @@ var (
 		InlineKeyboard: [][]telegram.InlineKeyboardButton{
 			{
 				{Text: startButton, CallbackData: "/start"},
-				{Text: settingsButton, CallbackData: "/settings"},
 			},
-		},
-	}
-
-	settingsKeyboard = telegram.InlineKeyboardMarkup{
-		InlineKeyboard: [][]telegram.InlineKeyboardButton{
 			{
 				{Text: shapesButton, CallbackData: "/settings/shape"},
 				{Text: iterButton, CallbackData: "/settings/iter"},
@@ -79,9 +73,6 @@ var (
 				{Text: alphaButton, CallbackData: "/settings/alpha"},
 				{Text: extButton, CallbackData: "/settings/ext"},
 				{Text: sizeButton, CallbackData: "/settings/size"},
-			},
-			{
-				{Text: backButton, CallbackData: "/"},
 			},
 		},
 	}
@@ -97,7 +88,7 @@ var (
 			{{Text: bezierCurves, CallbackData: "/settings/shape/6"}},
 			{{Text: rotatedEllipses, CallbackData: "/settings/shape/7"}},
 			{{Text: quadrilaterals, CallbackData: "/settings/shape/8"}},
-			{{Text: backButton, CallbackData: "/settings"}},
+			{{Text: backButton, CallbackData: "/"}},
 		},
 	}
 
@@ -114,7 +105,7 @@ var (
 				{Text: "2000", CallbackData: "/settings/iter/2000"},
 			},
 			{
-				{Text: backButton, CallbackData: "/settings"},
+				{Text: backButton, CallbackData: "/"},
 			},
 		},
 	}
@@ -129,7 +120,10 @@ var (
 			{
 				{Text: "4", CallbackData: "/settings/rep/4"},
 				{Text: "5", CallbackData: "/settings/rep/5"},
-				{Text: backButton, CallbackData: "/settings"},
+				{Text: "6", CallbackData: "/settings/rep/6"},
+			},
+			{
+				{Text: backButton, CallbackData: "/"},
 			},
 		},
 	}
@@ -146,7 +140,7 @@ var (
 				{Text: "255", CallbackData: "/settings/alpha/255"},
 			},
 			{
-				{Text: backButton, CallbackData: "/settings"},
+				{Text: backButton, CallbackData: "/"},
 			},
 		},
 	}
@@ -160,7 +154,7 @@ var (
 				{Text: "gif", CallbackData: "/settings/ext/gif"},
 			},
 			{
-				{Text: backButton, CallbackData: "/settings"},
+				{Text: backButton, CallbackData: "/"},
 			},
 		},
 	}
@@ -178,33 +172,8 @@ var (
 				{Text: "1920", CallbackData: "/settings/size/1920"},
 			},
 			{
-				{Text: backButton, CallbackData: "/settings"},
+				{Text: backButton, CallbackData: "/"},
 			},
 		},
 	}
 )
-
-// func createShapesKeyboard(chosenShape primitive.Shape) telegram.InlineKeyboardMarkup {
-// 	numShapes := 8
-// 	buttons := make([][]telegram.InlineKeyboardButton, numShapes+1)
-// 	for i := 0; i < numShapes; i++ {
-// 		text := shapeNames[primitive.Shape(i)]
-// 		if i == int(chosenShape) {
-// 			text = fmt.Sprintf("%s ✔️", text)
-// 		}
-
-// 		buttons[i] = append(
-// 			buttons[i],
-// 			telegram.InlineKeyboardButton{
-// 				Text:         text,
-// 				CallbackData: fmt.Sprint(i),
-// 			},
-// 		)
-// 	}
-// 	buttons[numShapes] = append(
-// 		buttons[numShapes],
-// 		telegram.InlineKeyboardButton{Text: backButton, CallbackData: settingsMenu},
-// 	)
-
-// 	return telegram.InlineKeyboardMarkup{InlineKeyboard: buttons}
-// }

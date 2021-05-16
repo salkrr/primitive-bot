@@ -65,9 +65,6 @@ func (app *application) handleCallbackQuery(q telegram.CallbackQuery, out chan s
 			strings.ToLower(shapeNames[s.Config.Shape]), s.Config.Iterations,
 			s.Config.Repeat, s.Config.Alpha, s.Config.Extension, s.Config.OutputSize))
 
-	case match(q.Data, "/settings"):
-		app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, settingsMenu, settingsKeyboard)
-
 	case match(q.Data, "/settings/shape"):
 		app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, shapesMenu, shapesKeyboard)
 
@@ -89,7 +86,7 @@ func (app *application) handleCallbackQuery(q telegram.CallbackQuery, out chan s
 	case match(q.Data, "/settings/rep"):
 		app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, repMenu, repKeyboard)
 
-	case match(q.Data, "/settings/rep/([1-5])", &num):
+	case match(q.Data, "/settings/rep/([1-6])", &num):
 		// TODO: add symbol to the chosen option
 		s.Config.Repeat = num
 		app.sessions.Set(q.From.ID, s)
