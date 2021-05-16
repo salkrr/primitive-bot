@@ -12,16 +12,27 @@ import (
 type application struct {
 	infoLog  *log.Logger
 	errorLog *log.Logger
+	inDir    string
+	outDir   string
 	bot      *telegram.Bot
 	sessions *sessions.ActiveSessions
 }
 
 func main() {
 	token := flag.String("token", "", "The token for the Telegram Bot")
+	inDir := flag.String("i", "inputs", "Name of the directory where inputs will be stored")
+	outDir := flag.String("o", "outputs", "Name of the directory where outputs will be stored")
 	flag.Parse()
 
 	if *token == "" {
 		log.Fatal("You need to provide the token for the Telegram Bot!")
+	}
+
+	if err := os.MkdirAll(*inDir, 0664); err != nil {
+		log.Fatal(err)
+	}
+	if err := os.MkdirAll(*outDir, 0664); err != nil {
+		log.Fatal(err)
 	}
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
@@ -30,6 +41,8 @@ func main() {
 	app := application{
 		infoLog:  infoLog,
 		errorLog: errorLog,
+		inDir:    *inDir,
+		outDir:   *outDir,
 		bot:      &telegram.Bot{Token: *token},
 		sessions: sessions.New(),
 	}
@@ -53,7 +66,6 @@ func (app *application) listenAndServe() {
 
 		numUpdates := len(updates)
 		if numUpdates == 0 {
-			app.infoLog.Printf("No updates.")
 			continue
 		}
 
