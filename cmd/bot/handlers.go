@@ -43,13 +43,13 @@ func (app *application) handleMessage(m telegram.Message, out chan sessions.Sess
 	// Choose smallest image with dimensions >= 256
 	var file telegram.PhotoSize
 	for _, photo := range m.Photo {
+		file = photo
 		if photo.Width >= 256 && photo.Height >= 256 {
-			file = photo
 			break
 		}
 	}
 	if file.FileID == "" {
-		app.serverError(m.Chat.ID, fmt.Errorf("no image with dimensions >= 256 in %v", m.Photo))
+		app.serverError(m.Chat.ID, fmt.Errorf("no image files in %v", m.Photo))
 		return
 	}
 
