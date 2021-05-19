@@ -353,6 +353,7 @@ func (app *application) worker() {
 		// get next operation
 		op, ok := app.queue.Peek()
 		if !ok {
+			time.Sleep(1 * time.Second)
 			continue
 		}
 
