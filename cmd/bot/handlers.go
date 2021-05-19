@@ -15,22 +15,47 @@ import (
 )
 
 func (app *application) handleMessage(m telegram.Message) {
-	if m.Photo == nil {
-		// Handle user input if they are inside input form
-		s, ok := app.sessions.Get(m.From.ID)
-		if ok && s.InChan != nil {
-			s.InChan <- m
-			return
-		}
-
-		// Send help message
-		err := app.bot.SendMessage(m.Chat.ID, helpMessage)
-		if err != nil {
-			app.serverError(m.Chat.ID, err)
-		}
+	if m.Photo != nil {
+		app.handlePhotoMessage(m)
 		return
 	}
 
+	// Handle user input if they are inside input form
+	s, ok := app.sessions.Get(m.From.ID)
+	if ok && s.InChan != nil {
+		s.InChan <- m
+		return
+	}
+
+	if m.Text == "/status" {
+		operations, positions := app.queue.GetOperations(s.ChatID)
+		if len(operations) == 0 {
+			err := app.bot.SendMessage(m.Chat.ID, statusEmptyMessage)
+			if err != nil {
+				app.serverError(m.Chat.ID, err)
+			}
+			return
+		}
+
+		for i, op := range operations {
+			err := app.bot.SendMessage(m.Chat.ID, app.createStatusMessage(op.Config, positions[i]))
+			if err != nil {
+				app.serverError(m.Chat.ID, err)
+				return
+			}
+		}
+
+		return
+	}
+
+	// Send help message
+	err := app.bot.SendMessage(m.Chat.ID, helpMessage)
+	if err != nil {
+		app.serverError(m.Chat.ID, err)
+	}
+}
+
+func (app *application) handlePhotoMessage(m telegram.Message) {
 	// If we already have session - delete it's menu
 	s, ok := app.sessions.Get(m.From.ID)
 	if ok {
@@ -101,20 +126,12 @@ func (app *application) handleCallbackQuery(q telegram.CallbackQuery) {
 	case match(q.Data, "/"):
 		app.bot.EditMessageTextWithKeyboard(q.Message.Chat.ID, q.Message.MessageID, rootMenuText, rootKeyboard)
 	case match(q.Data, "/start"):
-		// app.sessions.Delete(q.From.ID)
-		// err := app.bot.DeleteMessage(q.Message.Chat.ID, q.Message.MessageID)
-		// if err != nil {
-		// 	app.serverError(q.Message.Chat.ID, err)
-		// }
-
 		pos := app.queue.Enqueue(queue.Operation{
 			ChatID:  q.Message.Chat.ID,
 			ImgPath: s.ImgPath,
 			Config:  s.Config,
 		})
-		report := fmt.Sprintf(enqueuedMessage, pos, strings.ToLower(shapeNames[s.Config.Shape]),
-			s.Config.Iterations, s.Config.Repeat, s.Config.Alpha, s.Config.Extension, s.Config.OutputSize)
-		err := app.bot.SendMessage(q.Message.Chat.ID, report)
+		err := app.bot.SendMessage(q.Message.Chat.ID, app.createStatusMessage(s.Config, pos))
 		if err != nil {
 			app.serverError(q.Message.Chat.ID, err)
 		}

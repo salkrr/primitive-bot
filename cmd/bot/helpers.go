@@ -5,7 +5,10 @@ import (
 	"regexp"
 	"runtime/debug"
 	"strconv"
+	"strings"
 	"sync"
+
+	"github.com/lazy-void/primitive-bot/pkg/primitive"
 )
 
 func (app *application) serverError(chatID int64, err error) {
@@ -13,6 +16,11 @@ func (app *application) serverError(chatID int64, err error) {
 
 	app.errorLog.Output(2, trace)
 	app.bot.SendMessage(chatID, errorMessage)
+}
+
+func (app *application) createStatusMessage(c primitive.Config, position int) string {
+	return fmt.Sprintf(statusMessage, position, strings.ToLower(shapeNames[c.Shape]),
+		c.Iterations, c.Repeat, c.Alpha, c.Extension, c.OutputSize)
 }
 
 // match reports whether path matches ^pattern$, and if it matches,
