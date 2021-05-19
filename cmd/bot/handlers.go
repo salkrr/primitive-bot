@@ -9,16 +9,17 @@ import (
 	"time"
 
 	"github.com/lazy-void/primitive-bot/pkg/primitive"
+	"github.com/lazy-void/primitive-bot/pkg/queue"
 	"github.com/lazy-void/primitive-bot/pkg/sessions"
 	"github.com/lazy-void/primitive-bot/pkg/telegram"
 )
 
-func (app *application) handleMessage(m telegram.Message, out chan sessions.Session) {
+func (app *application) handleMessage(m telegram.Message) {
 	if m.Photo == nil {
 		// Handle user input if they are inside input form
 		s, ok := app.sessions.Get(m.From.ID)
-		if ok && s.InputChannel != nil {
-			s.InputChannel <- m
+		if ok && s.InChan != nil {
+			s.InChan <- m
 			return
 		}
 
@@ -72,13 +73,13 @@ func (app *application) handleMessage(m telegram.Message, out chan sessions.Sess
 	app.sessions.Set(m.From.ID, sessions.Session{
 		ChatID:        m.Chat.ID,
 		MenuMessageID: msg.MessageID,
-		InputChannel:  nil,
+		InChan:        nil,
 		ImgPath:       path,
 		Config:        primitive.NewConfig(),
 	})
 }
 
-func (app *application) handleCallbackQuery(q telegram.CallbackQuery, out chan sessions.Session) {
+func (app *application) handleCallbackQuery(q telegram.CallbackQuery) {
 	defer func() {
 		if err := app.bot.AnswerCallbackQuery(q.ID, ""); err != nil {
 			app.errorLog.Printf("Answer callback query error: %s", err)
@@ -86,9 +87,11 @@ func (app *application) handleCallbackQuery(q telegram.CallbackQuery, out chan s
 	}()
 
 	s, ok := app.sessions.Get(q.From.ID)
-	if !ok {
-		// Remove keyboard of an invalid session
-		app.bot.DeleteMessage(q.Message.Chat.ID, q.Message.MessageID)
+	if !ok || q.Message.MessageID != s.MenuMessageID {
+		err := app.bot.DeleteMessage(q.Message.Chat.ID, q.Message.MessageID)
+		if err != nil {
+			app.errorLog.Printf("Deleting message error: %s", err)
+		}
 		return
 	}
 
@@ -98,14 +101,23 @@ func (app *application) handleCallbackQuery(q telegram.CallbackQuery, out chan s
 	case match(q.Data, "/"):
 		app.bot.EditMessageTextWithKeyboard(q.Message.Chat.ID, q.Message.MessageID, rootMenuText, rootKeyboard)
 	case match(q.Data, "/start"):
-		app.sessions.Delete(q.From.ID)
-		app.bot.DeleteMessage(q.Message.Chat.ID, q.Message.MessageID)
+		// app.sessions.Delete(q.From.ID)
+		// err := app.bot.DeleteMessage(q.Message.Chat.ID, q.Message.MessageID)
+		// if err != nil {
+		// 	app.serverError(q.Message.Chat.ID, err)
+		// }
 
-		report := fmt.Sprintf(enqueuedMessage, strings.ToLower(shapeNames[s.Config.Shape]),
+		pos := app.queue.Enqueue(queue.Operation{
+			ChatID:  q.Message.Chat.ID,
+			ImgPath: s.ImgPath,
+			Config:  s.Config,
+		})
+		report := fmt.Sprintf(enqueuedMessage, pos, strings.ToLower(shapeNames[s.Config.Shape]),
 			s.Config.Iterations, s.Config.Repeat, s.Config.Alpha, s.Config.Extension, s.Config.OutputSize)
-		app.bot.SendMessage(q.Message.Chat.ID, report)
-
-		out <- s
+		err := app.bot.SendMessage(q.Message.Chat.ID, report)
+		if err != nil {
+			app.serverError(q.Message.Chat.ID, err)
+		}
 	case match(q.Data, "/settings/shape"):
 		optionCallback := fmt.Sprintf("/settings/shape/%d", s.Config.Shape)
 		app.showMenu(q.Message.Chat.ID, q.Message.MessageID, optionCallback, shapesMenuText, shapesKeyboard)
@@ -216,13 +228,13 @@ func (app *application) handleIterInput(
 	out := make(chan int)
 
 	// Get user input
-	s.InputChannel = in
+	s.InChan = in
 	app.sessions.Set(q.From.ID, s)
 
 	go app.getInputFromUser(q.Message.Chat.ID, q.Message.MessageID, 1, 5000, in, out)
 
 	s.Config.Iterations = <-out
-	s.InputChannel = nil
+	s.InChan = nil
 	app.sessions.Set(q.From.ID, s)
 	close(in)
 
@@ -239,13 +251,13 @@ func (app *application) handleAlphaInput(
 	out := make(chan int)
 
 	// Get user input
-	s.InputChannel = in
+	s.InChan = in
 	app.sessions.Set(q.From.ID, s)
 
 	go app.getInputFromUser(q.Message.Chat.ID, q.Message.MessageID, 1, 255, in, out)
 
 	s.Config.Alpha = <-out
-	s.InputChannel = nil
+	s.InChan = nil
 	app.sessions.Set(q.From.ID, s)
 	close(in)
 
@@ -262,13 +274,13 @@ func (app *application) handleSizeInput(
 	out := make(chan int)
 
 	// Get user input
-	s.InputChannel = in
+	s.InChan = in
 	app.sessions.Set(q.From.ID, s)
 
 	go app.getInputFromUser(q.Message.Chat.ID, q.Message.MessageID, 256, 3840, in, out)
 
 	s.Config.OutputSize = <-out
-	s.InputChannel = nil
+	s.InChan = nil
 	app.sessions.Set(q.From.ID, s)
 	close(in)
 
@@ -319,32 +331,37 @@ func (app *application) getInputFromUser(
 	}
 }
 
-func (app *application) primitiveWorker(in chan sessions.Session) {
-	var s sessions.Session
+func (app *application) worker() {
 	for {
-		// get next image from queue
-		s = <-in
+		// get next operation
+		op, ok := app.queue.Peek()
+		if !ok {
+			continue
+		}
 
 		start := time.Now()
 		app.infoLog.Printf("Creating from '%s' for chat '%d': count=%d, mode=%d, alpha=%d, repeat=%d, resolution=%d, extension=%s",
-			s.ImgPath, s.ChatID, s.Config.Iterations, s.Config.Shape, s.Config.Alpha, s.Config.Repeat, s.Config.OutputSize, s.Config.Extension)
+			op.ImgPath, op.ChatID, op.Config.Iterations, op.Config.Shape, op.Config.Alpha, op.Config.Repeat, op.Config.OutputSize, op.Config.Extension)
 
 		// create primitive
-		outputPath := fmt.Sprintf("%s/%d_%d.%s", app.outDir, s.ChatID, time.Now().Unix(), s.Config.Extension)
-		err := s.Config.Create(s.ImgPath, outputPath)
+		outputPath := fmt.Sprintf("%s/%d_%d.%s", app.outDir, op.ChatID, start.Unix(), op.Config.Extension)
+		err := op.Config.Create(op.ImgPath, outputPath)
 		if err != nil {
-			app.serverError(s.ChatID, err)
+			app.serverError(op.ChatID, err)
 			return
 		}
 		app.infoLog.Printf("Finished creating '%s' for chat '%d'; Output: '%s'; Time: %.1f seconds",
-			filepath.Base(s.ImgPath), s.ChatID, filepath.Base(outputPath), time.Since(start).Seconds())
+			filepath.Base(op.ImgPath), op.ChatID, filepath.Base(outputPath), time.Since(start).Seconds())
 
 		// send output to the user
-		err = app.bot.SendDocument(s.ChatID, outputPath)
+		err = app.bot.SendDocument(op.ChatID, outputPath)
 		if err != nil {
-			app.serverError(s.ChatID, err)
+			app.serverError(op.ChatID, err)
 			return
 		}
-		app.infoLog.Printf("Sent result '%s' to the chat '%d'", filepath.Base(outputPath), s.ChatID)
+		app.infoLog.Printf("Sent result '%s' to the chat '%d'", filepath.Base(outputPath), op.ChatID)
+
+		// remove operation from the queue
+		app.queue.Dequeue()
 	}
 }

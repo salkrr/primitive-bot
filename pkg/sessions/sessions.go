@@ -1,19 +1,16 @@
 package sessions
 
 import (
-	"errors"
 	"sync"
 
 	"github.com/lazy-void/primitive-bot/pkg/primitive"
 	"github.com/lazy-void/primitive-bot/pkg/telegram"
 )
 
-var ErrNoSession = errors.New("session doesn't exist")
-
 type Session struct {
 	ChatID        int64
 	MenuMessageID int64
-	InputChannel  chan telegram.Message
+	InChan        chan<- telegram.Message
 	ImgPath       string
 	Config        primitive.Config
 }

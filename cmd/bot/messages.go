@@ -34,7 +34,7 @@ const (
 const (
 	helpMessage     = "Отправь мне какую-нибудь фотографию."
 	errorMessage    = "Что-то пошло не так! Попробуй снова через пару минут."
-	enqueuedMessage = "Добавил в очередь.\nФигуры: %s\nИтерации: %d\nПовторения: %d\nАльфа-канал: %d\nРасширение: %s\nРазмеры: %d"
+	enqueuedMessage = "%d место в очереди.\n\nФигуры: %s\nИтерации: %d\nПовторения: %d\nАльфа-канал: %d\nРасширение: %s\nРазмеры: %d"
 	inputMessage    = "Неверное значение!\nВведи число от %d до %d:"
 )
 
@@ -162,7 +162,8 @@ var (
 				{Text: "jpg", CallbackData: "/settings/ext/jpg"},
 				{Text: "png", CallbackData: "/settings/ext/png"},
 				{Text: "svg", CallbackData: "/settings/ext/svg"},
-				{Text: "gif", CallbackData: "/settings/ext/gif"},
+				// gifs are disabled due to performance issues
+				// {Text: "gif", CallbackData: "/settings/ext/gif"},
 			},
 			{
 				{Text: backButtonText, CallbackData: "/"},
