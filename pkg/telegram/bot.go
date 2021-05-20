@@ -77,41 +77,23 @@ func (b *Bot) AnswerCallbackQuery(callbackID, text string) error {
 	return nil
 }
 
-func (b *Bot) EditMessageTextWithKeyboard(chatID, messageID int64, text string, keyboard InlineKeyboardMarkup) error {
+func (b *Bot) EditMessageText(chatID, messageID int64, text string, keyboard ...InlineKeyboardMarkup) error {
 	u, err := url.Parse(fmt.Sprintf("%s%s/editMessageText", baseBotURL, b.Token))
 	if err != nil {
 		return err
 	}
 
-	jsonBody, err := json.Marshal(map[string]interface{}{
-		"chat_id":      chatID,
-		"message_id":   messageID,
-		"text":         text,
-		"reply_markup": keyboard,
-	})
-	if err != nil {
-		return err
-	}
-
-	_, err = b.sendPostRequest(u.String(), "application/json", bytes.NewBuffer(jsonBody))
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (b *Bot) EditMessageText(chatID, messageID int64, text string) error {
-	u, err := url.Parse(fmt.Sprintf("%s%s/editMessageText", baseBotURL, b.Token))
-	if err != nil {
-		return err
-	}
-
-	jsonBody, err := json.Marshal(map[string]interface{}{
+	params := map[string]interface{}{
 		"chat_id":    chatID,
 		"message_id": messageID,
 		"text":       text,
-	})
+	}
+
+	if len(keyboard) > 0 {
+		params["reply_markup"] = keyboard[0]
+	}
+
+	jsonBody, err := json.Marshal(params)
 	if err != nil {
 		return err
 	}
@@ -124,12 +106,17 @@ func (b *Bot) EditMessageText(chatID, messageID int64, text string) error {
 	return nil
 }
 
-func (b *Bot) SendMessageWithInlineKeyboard(chatID int64, message string, keyboard InlineKeyboardMarkup) (Message, error) {
-	jsonBody, err := json.Marshal(map[string]interface{}{
-		"chat_id":      chatID,
-		"text":         message,
-		"reply_markup": keyboard,
-	})
+func (b *Bot) SendMessage(chatID int64, message string, keyboard ...InlineKeyboardMarkup) (Message, error) {
+	params := map[string]interface{}{
+		"chat_id": chatID,
+		"text":    message,
+	}
+
+	if len(keyboard) > 0 {
+		params["reply_markup"] = keyboard[0]
+	}
+
+	jsonBody, err := json.Marshal(params)
 	if err != nil {
 		return Message{}, err
 	}
@@ -156,28 +143,6 @@ func (b *Bot) SendMessageWithInlineKeyboard(chatID int64, message string, keyboa
 	}
 
 	return result, nil
-}
-
-func (b *Bot) SendMessage(chatID int64, message string) error {
-	jsonBody, err := json.Marshal(map[string]interface{}{
-		"chat_id": chatID,
-		"text":    message,
-	})
-	if err != nil {
-		return err
-	}
-
-	u, err := url.Parse(fmt.Sprintf("%s%s/sendMessage", baseBotURL, b.Token))
-	if err != nil {
-		return err
-	}
-
-	_, err = b.sendPostRequest(u.String(), "application/json", bytes.NewBuffer(jsonBody))
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (b *Bot) SendPhoto(chatID int64, photoPath string) error {

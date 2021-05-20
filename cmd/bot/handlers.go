@@ -27,7 +27,7 @@ func (app *application) handleMessage(m telegram.Message) {
 	if m.Text == "/status" {
 		operations, positions := app.queue.GetOperations(s.ChatID)
 		if len(operations) == 0 {
-			err := app.bot.SendMessage(m.Chat.ID, statusEmptyMessage)
+			_, err := app.bot.SendMessage(m.Chat.ID, statusEmptyMessage)
 			if err != nil {
 				app.serverError(m.Chat.ID, err)
 			}
@@ -35,7 +35,7 @@ func (app *application) handleMessage(m telegram.Message) {
 		}
 
 		for i, op := range operations {
-			err := app.bot.SendMessage(m.Chat.ID, app.createStatusMessage(op.Config, positions[i]))
+			_, err := app.bot.SendMessage(m.Chat.ID, app.createStatusMessage(op.Config, positions[i]))
 			if err != nil {
 				app.serverError(m.Chat.ID, err)
 				return
@@ -46,7 +46,7 @@ func (app *application) handleMessage(m telegram.Message) {
 	}
 
 	// Send help message
-	err := app.bot.SendMessage(m.Chat.ID, helpMessage)
+	_, err := app.bot.SendMessage(m.Chat.ID, helpMessage)
 	if err != nil {
 		app.serverError(m.Chat.ID, err)
 	}
@@ -87,7 +87,7 @@ func (app *application) handlePhotoMessage(m telegram.Message) {
 	}
 
 	// Create session
-	msg, err := app.bot.SendMessageWithInlineKeyboard(m.Chat.ID, rootMenuText, rootKeyboard)
+	msg, err := app.bot.SendMessage(m.Chat.ID, rootMenuText, rootKeyboard)
 	if err != nil {
 		app.serverError(m.Chat.ID, err)
 		return
@@ -121,11 +121,11 @@ func (app *application) handleCallbackQuery(q telegram.CallbackQuery) {
 	var slug string
 	switch {
 	case match(q.Data, "/"):
-		app.bot.EditMessageTextWithKeyboard(q.Message.Chat.ID, q.Message.MessageID, rootMenuText, rootKeyboard)
+		app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, rootMenuText, rootKeyboard)
 	case match(q.Data, "/start"):
 		n := app.queue.GetNumOperations(s.ChatID)
 		if n >= app.operationsLimit {
-			if err := app.bot.SendMessage(s.ChatID, operationsLimitMessage); err != nil {
+			if _, err := app.bot.SendMessage(s.ChatID, operationsLimitMessage); err != nil {
 				app.serverError(s.ChatID, err)
 			}
 			return
@@ -136,7 +136,7 @@ func (app *application) handleCallbackQuery(q telegram.CallbackQuery) {
 			ImgPath: s.ImgPath,
 			Config:  s.Config,
 		})
-		err := app.bot.SendMessage(s.ChatID, app.createStatusMessage(s.Config, pos))
+		_, err := app.bot.SendMessage(s.ChatID, app.createStatusMessage(s.Config, pos))
 		if err != nil {
 			app.serverError(s.ChatID, err)
 		}
@@ -231,7 +231,7 @@ func (app *application) showMenu(
 	}
 
 	keyboard := newKeyboardFromTemplate(template, chosenCallback, newName)
-	err := app.bot.EditMessageTextWithKeyboard(chatID, messageID, menuText, keyboard)
+	err := app.bot.EditMessageText(chatID, messageID, menuText, keyboard)
 	if err != nil {
 		if strings.Contains(err.Error(), "400") {
 			// 400 error: message is not modified
