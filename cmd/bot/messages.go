@@ -20,18 +20,6 @@ var shapeNames = map[primitive.Shape]string{
 }
 
 const (
-	combo             = "Все"
-	triangles         = "Треугольники"
-	rectangles        = "Прямоугольники"
-	rotatedRectangles = "Повёрнутые прямоугольники"
-	circles           = "Круги"
-	ellipses          = "Эллипсы"
-	rotatedEllipses   = "Повёрнутые эллипсы"
-	quadrilaterals    = "Четырёхугольники"
-	bezierCurves      = "Кривые Безье"
-)
-
-const (
 	helpMessage            = "Отправь мне какую-нибудь фотографию."
 	errorMessage           = "Что-то пошло не так! Попробуй снова через пару минут."
 	inputMessage           = "Неверное значение!\nВведи число от %d до %d:"
@@ -52,7 +40,7 @@ const (
 )
 
 const (
-	startButtonText    = "Начать"
+	createButtonText   = "Начать"
 	settingsButtonText = "Настройки"
 	backButtonText     = "Назад"
 	shapesButtonText   = "Фигуры"
@@ -61,61 +49,63 @@ const (
 	alphaButtonText    = "Альфа"
 	extButtonText      = "Расширение"
 	sizeButtonText     = "Размеры"
+	otherButtonText    = "Другое"
+	autoButtonText     = "Автоматически"
 )
 
 var (
 	rootKeyboard = telegram.InlineKeyboardMarkup{
 		InlineKeyboard: [][]telegram.InlineKeyboardButton{
 			{
-				{Text: startButtonText, CallbackData: "/start"},
+				{Text: createButtonText, CallbackData: createButtonCallback},
 			},
 			{
-				{Text: shapesButtonText, CallbackData: "/settings/shape"},
-				{Text: iterButtonText, CallbackData: "/settings/iter"},
+				{Text: shapesButtonText, CallbackData: shapesButtonCallback},
+				{Text: iterButtonText, CallbackData: iterButtonCallback},
 			},
 			{
-				{Text: repButtonText, CallbackData: "/settings/rep"},
-				{Text: alphaButtonText, CallbackData: "/settings/alpha"},
+				{Text: repButtonText, CallbackData: repButtonCallback},
+				{Text: alphaButtonText, CallbackData: alphaButtonCallback},
 			},
 			{
-				{Text: extButtonText, CallbackData: "/settings/ext"},
-				{Text: sizeButtonText, CallbackData: "/settings/size"},
+				{Text: extButtonText, CallbackData: extButtonCallback},
+				{Text: sizeButtonText, CallbackData: sizeButtonCallback},
 			},
 		},
 	}
 
 	shapesKeyboard = telegram.InlineKeyboardMarkup{
 		InlineKeyboard: [][]telegram.InlineKeyboardButton{
-			{{Text: shapeNames[primitive.ShapeAny], CallbackData: "/settings/shape/0"}},
-			{{Text: triangles, CallbackData: "/settings/shape/1"}},
-			{{Text: rectangles, CallbackData: "/settings/shape/2"}},
-			{{Text: ellipses, CallbackData: "/settings/shape/3"}},
-			{{Text: circles, CallbackData: "/settings/shape/4"}},
-			{{Text: rotatedRectangles, CallbackData: "/settings/shape/5"}},
-			{{Text: bezierCurves, CallbackData: "/settings/shape/6"}},
-			{{Text: rotatedEllipses, CallbackData: "/settings/shape/7"}},
-			{{Text: quadrilaterals, CallbackData: "/settings/shape/8"}},
-			{{Text: backButtonText, CallbackData: "/"}},
+			{{Text: shapeNames[primitive.ShapeAny], CallbackData: fmt.Sprintf("%s/0", shapesButtonCallback)}},
+			{{Text: shapeNames[primitive.ShapeTriangle], CallbackData: fmt.Sprintf("%s/1", shapesButtonCallback)}},
+			{{Text: shapeNames[primitive.ShapeRectangle], CallbackData: fmt.Sprintf("%s/2", shapesButtonCallback)}},
+			{{Text: shapeNames[primitive.ShapeEllipse], CallbackData: fmt.Sprintf("%s/3", shapesButtonCallback)}},
+			{{Text: shapeNames[primitive.ShapeCircle], CallbackData: fmt.Sprintf("%s/4", shapesButtonCallback)}},
+			{{Text: shapeNames[primitive.ShapeRotatedRectangle], CallbackData: fmt.Sprintf("%s/5", shapesButtonCallback)}},
+			{{Text: shapeNames[primitive.ShapeBezier], CallbackData: fmt.Sprintf("%s/6", shapesButtonCallback)}},
+			{{Text: shapeNames[primitive.ShapeRotatedEllipse], CallbackData: fmt.Sprintf("%s/7", shapesButtonCallback)}},
+			{{Text: shapeNames[primitive.ShapePolygon], CallbackData: fmt.Sprintf("%s/8", shapesButtonCallback)}},
+			{{Text: backButtonText, CallbackData: rootMenuCallback}},
 		},
 	}
 
 	iterKeyboard = telegram.InlineKeyboardMarkup{
 		InlineKeyboard: [][]telegram.InlineKeyboardButton{
 			{
-				{Text: "100", CallbackData: "/settings/iter/100"},
-				{Text: "200", CallbackData: "/settings/iter/200"},
-				{Text: "400", CallbackData: "/settings/iter/400"},
+				{Text: "100", CallbackData: fmt.Sprintf("%s/100", iterButtonCallback)},
+				{Text: "200", CallbackData: fmt.Sprintf("%s/200", iterButtonCallback)},
+				{Text: "400", CallbackData: fmt.Sprintf("%s/400", iterButtonCallback)},
 			},
 			{
-				{Text: "800", CallbackData: "/settings/iter/800"},
-				{Text: "1000", CallbackData: "/settings/iter/1000"},
-				{Text: "2000", CallbackData: "/settings/iter/2000"},
+				{Text: "800", CallbackData: fmt.Sprintf("%s/800", iterButtonCallback)},
+				{Text: "1000", CallbackData: fmt.Sprintf("%s/1000", iterButtonCallback)},
+				{Text: "2000", CallbackData: fmt.Sprintf("%s/2000", iterButtonCallback)},
 			},
 			{
-				{Text: "Другое", CallbackData: "/settings/iter/input"},
+				{Text: otherButtonText, CallbackData: iterInputCallback},
 			},
 			{
-				{Text: backButtonText, CallbackData: "/"},
+				{Text: backButtonText, CallbackData: rootMenuCallback},
 			},
 		},
 	}
@@ -123,17 +113,17 @@ var (
 	repKeyboard = telegram.InlineKeyboardMarkup{
 		InlineKeyboard: [][]telegram.InlineKeyboardButton{
 			{
-				{Text: "1", CallbackData: "/settings/rep/1"},
-				{Text: "2", CallbackData: "/settings/rep/2"},
-				{Text: "3", CallbackData: "/settings/rep/3"},
+				{Text: "1", CallbackData: fmt.Sprintf("%s/1", repButtonCallback)},
+				{Text: "2", CallbackData: fmt.Sprintf("%s/2", repButtonCallback)},
+				{Text: "3", CallbackData: fmt.Sprintf("%s/3", repButtonCallback)},
 			},
 			{
-				{Text: "4", CallbackData: "/settings/rep/4"},
-				{Text: "5", CallbackData: "/settings/rep/5"},
-				{Text: "6", CallbackData: "/settings/rep/6"},
+				{Text: "4", CallbackData: fmt.Sprintf("%s/4", repButtonCallback)},
+				{Text: "5", CallbackData: fmt.Sprintf("%s/5", repButtonCallback)},
+				{Text: "6", CallbackData: fmt.Sprintf("%s/6", repButtonCallback)},
 			},
 			{
-				{Text: backButtonText, CallbackData: "/"},
+				{Text: backButtonText, CallbackData: rootMenuCallback},
 			},
 		},
 	}
@@ -141,19 +131,19 @@ var (
 	alphaKeyboard = telegram.InlineKeyboardMarkup{
 		InlineKeyboard: [][]telegram.InlineKeyboardButton{
 			{
-				{Text: "Автоматически", CallbackData: "/settings/alpha/0"},
+				{Text: autoButtonText, CallbackData: fmt.Sprintf("%s/0", alphaButtonCallback)},
 			},
 			{
-				{Text: "32", CallbackData: "/settings/alpha/32"},
-				{Text: "64", CallbackData: "/settings/alpha/64"},
-				{Text: "128", CallbackData: "/settings/alpha/128"},
-				{Text: "255", CallbackData: "/settings/alpha/255"},
+				{Text: "32", CallbackData: fmt.Sprintf("%s/32", alphaButtonCallback)},
+				{Text: "64", CallbackData: fmt.Sprintf("%s/64", alphaButtonCallback)},
+				{Text: "128", CallbackData: fmt.Sprintf("%s/128", alphaButtonCallback)},
+				{Text: "255", CallbackData: fmt.Sprintf("%s/255", alphaButtonCallback)},
 			},
 			{
-				{Text: "Другое", CallbackData: "/settings/alpha/input"},
+				{Text: otherButtonText, CallbackData: alphaInputCallback},
 			},
 			{
-				{Text: backButtonText, CallbackData: "/"},
+				{Text: backButtonText, CallbackData: rootMenuCallback},
 			},
 		},
 	}
@@ -161,14 +151,14 @@ var (
 	extKeyboard = telegram.InlineKeyboardMarkup{
 		InlineKeyboard: [][]telegram.InlineKeyboardButton{
 			{
-				{Text: "jpg", CallbackData: "/settings/ext/jpg"},
-				{Text: "png", CallbackData: "/settings/ext/png"},
-				{Text: "svg", CallbackData: "/settings/ext/svg"},
+				{Text: "jpg", CallbackData: fmt.Sprintf("%s/jpg", extButtonCallback)},
+				{Text: "png", CallbackData: fmt.Sprintf("%s/png", extButtonCallback)},
+				{Text: "svg", CallbackData: fmt.Sprintf("%s/svg", extButtonCallback)},
 				// gifs are disabled due to performance issues
-				// {Text: "gif", CallbackData: "/settings/ext/gif"},
+				// {Text: "gif", CallbackData: fmt.Sprintf("%s/gif", extButtonCallback)},
 			},
 			{
-				{Text: backButtonText, CallbackData: "/"},
+				{Text: backButtonText, CallbackData: rootMenuCallback},
 			},
 		},
 	}
@@ -176,20 +166,20 @@ var (
 	sizeKeyboard = telegram.InlineKeyboardMarkup{
 		InlineKeyboard: [][]telegram.InlineKeyboardButton{
 			{
-				{Text: "256", CallbackData: "/settings/size/256"},
-				{Text: "512", CallbackData: "/settings/size/512"},
-				{Text: "720", CallbackData: "/settings/size/720"},
+				{Text: "256", CallbackData: fmt.Sprintf("%s/256", sizeButtonCallback)},
+				{Text: "512", CallbackData: fmt.Sprintf("%s/512", sizeButtonCallback)},
+				{Text: "720", CallbackData: fmt.Sprintf("%s/720", sizeButtonCallback)},
 			},
 			{
-				{Text: "1024", CallbackData: "/settings/size/1024"},
-				{Text: "1280", CallbackData: "/settings/size/1280"},
-				{Text: "1920", CallbackData: "/settings/size/1920"},
+				{Text: "1024", CallbackData: fmt.Sprintf("%s/1024", sizeButtonCallback)},
+				{Text: "1280", CallbackData: fmt.Sprintf("%s/1280", sizeButtonCallback)},
+				{Text: "1920", CallbackData: fmt.Sprintf("%s/1920", sizeButtonCallback)},
 			},
 			{
-				{Text: "Другое", CallbackData: "/settings/size/input"},
+				{Text: otherButtonText, CallbackData: sizeInputCallback},
 			},
 			{
-				{Text: backButtonText, CallbackData: "/"},
+				{Text: backButtonText, CallbackData: rootMenuCallback},
 			},
 		},
 	}
@@ -203,6 +193,7 @@ func newKeyboardFromTemplate(
 	newText string,
 ) telegram.InlineKeyboardMarkup {
 	checkSymbol := "👉"
+
 	newKeyboard := telegram.InlineKeyboardMarkup{}
 	newKeyboard.InlineKeyboard = make([][]telegram.InlineKeyboardButton, len(template.InlineKeyboard))
 	for i, row := range template.InlineKeyboard {

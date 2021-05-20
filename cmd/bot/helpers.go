@@ -15,8 +15,15 @@ import (
 func (app *application) serverError(chatID int64, err error) {
 	trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
 
-	app.errorLog.Output(2, trace)
-	app.bot.SendMessage(chatID, errorMessage)
+	err = app.errorLog.Output(2, trace)
+	if err != nil {
+		app.errorLog.Print(err)
+	}
+
+	_, err = app.bot.SendMessage(chatID, errorMessage)
+	if err != nil {
+		app.errorLog.Print(err)
+	}
 }
 
 func (app *application) createStatusMessage(c primitive.Config, position int) string {
@@ -63,6 +70,30 @@ func (app *application) getInputFromUser(
 			app.serverError(chatID, err)
 			return
 		}
+	}
+}
+
+func (app *application) showMenu(
+	chatID, messageID int64,
+	chosenCallback,
+	menuText string,
+	template telegram.InlineKeyboardMarkup,
+	params ...string,
+) {
+	newName := ""
+	if len(params) > 0 {
+		newName = params[0]
+	}
+
+	keyboard := newKeyboardFromTemplate(template, chosenCallback, newName)
+	err := app.bot.EditMessageText(chatID, messageID, menuText, keyboard)
+	if err != nil {
+		if strings.Contains(err.Error(), "400") {
+			// 400 error: message is not modified
+			// and we don't care in this case
+			return
+		}
+		app.serverError(chatID, err)
 	}
 }
 
