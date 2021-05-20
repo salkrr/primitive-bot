@@ -73,7 +73,7 @@ func (q *Queue) Peek() (Operation, bool) {
 }
 
 // GetOperations returns operation with the given chatID and also the slice which
-// contains positions of these operations
+// contains positions of these operations.
 func (q *Queue) GetOperations(chatID int64) ([]Operation, []int) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -88,4 +88,20 @@ func (q *Queue) GetOperations(chatID int64) ([]Operation, []int) {
 		}
 	}
 	return operations, positions
+}
+
+// GetNumOperations returns the number of operations with specified chatID
+// that are currently in the queue.
+func (q *Queue) GetNumOperations(chatID int64) int {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+
+	counter := 0
+	for i, e := 1, q.elements.Front(); e != nil; i, e = i+1, e.Next() {
+		op := e.Value.(Operation)
+		if op.ChatID == chatID {
+			counter++
+		}
+	}
+	return counter
 }

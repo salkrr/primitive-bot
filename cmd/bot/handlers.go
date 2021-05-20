@@ -123,14 +123,22 @@ func (app *application) handleCallbackQuery(q telegram.CallbackQuery) {
 	case match(q.Data, "/"):
 		app.bot.EditMessageTextWithKeyboard(q.Message.Chat.ID, q.Message.MessageID, rootMenuText, rootKeyboard)
 	case match(q.Data, "/start"):
+		n := app.queue.GetNumOperations(s.ChatID)
+		if n >= app.operationsLimit {
+			if err := app.bot.SendMessage(s.ChatID, operationsLimitMessage); err != nil {
+				app.serverError(s.ChatID, err)
+			}
+			return
+		}
+
 		pos := app.queue.Enqueue(queue.Operation{
-			ChatID:  q.Message.Chat.ID,
+			ChatID:  s.ChatID,
 			ImgPath: s.ImgPath,
 			Config:  s.Config,
 		})
-		err := app.bot.SendMessage(q.Message.Chat.ID, app.createStatusMessage(s.Config, pos))
+		err := app.bot.SendMessage(s.ChatID, app.createStatusMessage(s.Config, pos))
 		if err != nil {
-			app.serverError(q.Message.Chat.ID, err)
+			app.serverError(s.ChatID, err)
 		}
 	case match(q.Data, "/settings/shape"):
 		optionCallback := fmt.Sprintf("/settings/shape/%d", s.Config.Shape)

@@ -14,19 +14,21 @@ import (
 )
 
 type application struct {
-	infoLog  *log.Logger
-	errorLog *log.Logger
-	inDir    string
-	outDir   string
-	bot      *telegram.Bot
-	sessions *sessions.ActiveSessions
-	queue    *queue.Queue
+	infoLog         *log.Logger
+	errorLog        *log.Logger
+	inDir           string
+	outDir          string
+	operationsLimit int
+	bot             *telegram.Bot
+	sessions        *sessions.ActiveSessions
+	queue           *queue.Queue
 }
 
 func main() {
 	token := flag.String("token", "", "The token for the Telegram Bot")
 	inDir := flag.String("i", "inputs", "Name of the directory where inputs will be stored")
 	outDir := flag.String("o", "outputs", "Name of the directory where outputs will be stored")
+	operationsLimit := flag.Int("limit", 5, "The number of operations that the user can add to the queue.")
 	flag.Parse()
 
 	if *token == "" {
@@ -44,13 +46,14 @@ func main() {
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
 	app := application{
-		infoLog:  infoLog,
-		errorLog: errorLog,
-		inDir:    *inDir,
-		outDir:   *outDir,
-		bot:      &telegram.Bot{Token: *token},
-		sessions: sessions.New(),
-		queue:    queue.New(),
+		infoLog:         infoLog,
+		errorLog:        errorLog,
+		inDir:           *inDir,
+		outDir:          *outDir,
+		operationsLimit: *operationsLimit,
+		bot:             &telegram.Bot{Token: *token},
+		sessions:        sessions.New(),
+		queue:           queue.New(),
 	}
 
 	infoLog.Printf("Starting to listen for updates...")
