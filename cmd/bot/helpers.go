@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/lazy-void/primitive-bot/pkg/primitive"
+	"github.com/lazy-void/primitive-bot/pkg/telegram"
 )
 
 func (app *application) serverError(chatID int64, err error) {
@@ -21,6 +22,48 @@ func (app *application) serverError(chatID int64, err error) {
 func (app *application) createStatusMessage(c primitive.Config, position int) string {
 	return fmt.Sprintf(statusMessage, position, strings.ToLower(shapeNames[c.Shape]),
 		c.Iterations, c.Repeat, c.Alpha, c.Extension, c.OutputSize)
+}
+
+func (app *application) getInputFromUser(
+	chatID, menuMessageID int64,
+	min, max int,
+	in chan telegram.Message,
+	out chan int,
+) {
+	err := app.bot.EditMessageText(chatID, menuMessageID,
+		fmt.Sprintf(inputMessage, min, max))
+	if err != nil {
+		app.serverError(chatID, err)
+		return
+	}
+
+	for {
+		userMsg := <-in
+		if err := app.bot.DeleteMessage(userMsg.Chat.ID, userMsg.MessageID); err != nil {
+			app.serverError(chatID, err)
+			return
+		}
+
+		userInput, err := strconv.Atoi(userMsg.Text)
+		// correct input
+		if err == nil && userInput >= min && userInput <= max {
+			out <- userInput
+			close(out)
+			return
+		}
+
+		// incorrect input
+		err = app.bot.EditMessageText(chatID, menuMessageID, fmt.Sprintf(inputMessage, min, max))
+		if err != nil {
+			if strings.Contains(err.Error(), "400") {
+				// 400 error: message is not modified
+				// and we don't care in this case
+				continue
+			}
+			app.serverError(chatID, err)
+			return
+		}
+	}
 }
 
 // match reports whether path matches ^pattern$, and if it matches,

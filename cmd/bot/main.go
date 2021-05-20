@@ -2,8 +2,11 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
+	"path/filepath"
+	"time"
 
 	"github.com/lazy-void/primitive-bot/pkg/queue"
 	"github.com/lazy-void/primitive-bot/pkg/sessions"
@@ -84,5 +87,41 @@ func (app *application) listenAndServe() {
 		}
 
 		offset = updates[numUpdates-1].UpdateID + 1
+	}
+}
+
+func (app *application) worker() {
+	for {
+		// get next operation
+		op, ok := app.queue.Peek()
+		if !ok {
+			time.Sleep(1 * time.Second)
+			continue
+		}
+
+		start := time.Now()
+		app.infoLog.Printf("Creating from '%s' for chat '%d': count=%d, mode=%d, alpha=%d, repeat=%d, resolution=%d, extension=%s",
+			op.ImgPath, op.ChatID, op.Config.Iterations, op.Config.Shape, op.Config.Alpha, op.Config.Repeat, op.Config.OutputSize, op.Config.Extension)
+
+		// create primitive
+		outputPath := fmt.Sprintf("%s/%d_%d.%s", app.outDir, op.ChatID, start.Unix(), op.Config.Extension)
+		err := op.Config.Create(op.ImgPath, outputPath)
+		if err != nil {
+			app.serverError(op.ChatID, err)
+			return
+		}
+		app.infoLog.Printf("Finished creating '%s' for chat '%d'; Output: '%s'; Time: %.1f seconds",
+			filepath.Base(op.ImgPath), op.ChatID, filepath.Base(outputPath), time.Since(start).Seconds())
+
+		// send output to the user
+		err = app.bot.SendDocument(op.ChatID, outputPath)
+		if err != nil {
+			app.serverError(op.ChatID, err)
+			return
+		}
+		app.infoLog.Printf("Sent result '%s' to the chat '%d'", filepath.Base(outputPath), op.ChatID)
+
+		// remove operation from the queue
+		app.queue.Dequeue()
 	}
 }

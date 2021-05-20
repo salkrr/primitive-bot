@@ -3,10 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/lazy-void/primitive-bot/pkg/primitive"
 	"github.com/lazy-void/primitive-bot/pkg/queue"
@@ -304,82 +301,4 @@ func (app *application) handleSizeInput(
 	buttonText := fmt.Sprintf("Другое (%d)", s.Config.OutputSize)
 	app.showMenu(q.Message.Chat.ID, q.Message.MessageID, "/settings/size/input",
 		sizeMenuText, sizeKeyboard, buttonText)
-}
-
-func (app *application) getInputFromUser(
-	chatID, menuMessageID int64,
-	min, max int,
-	in chan telegram.Message,
-	out chan int,
-) {
-	err := app.bot.EditMessageText(chatID, menuMessageID,
-		fmt.Sprintf(inputMessage, min, max))
-	if err != nil {
-		app.serverError(chatID, err)
-		return
-	}
-
-	for {
-		userMsg := <-in
-		if err := app.bot.DeleteMessage(userMsg.Chat.ID, userMsg.MessageID); err != nil {
-			app.serverError(chatID, err)
-			return
-		}
-
-		userInput, err := strconv.Atoi(userMsg.Text)
-		// correct input
-		if err == nil && userInput >= min && userInput <= max {
-			out <- userInput
-			close(out)
-			return
-		}
-
-		// incorrect input
-		err = app.bot.EditMessageText(chatID, menuMessageID, fmt.Sprintf(inputMessage, min, max))
-		if err != nil {
-			if strings.Contains(err.Error(), "400") {
-				// 400 error: message is not modified
-				// and we don't care in this case
-				continue
-			}
-			app.serverError(chatID, err)
-			return
-		}
-	}
-}
-
-func (app *application) worker() {
-	for {
-		// get next operation
-		op, ok := app.queue.Peek()
-		if !ok {
-			time.Sleep(1 * time.Second)
-			continue
-		}
-
-		start := time.Now()
-		app.infoLog.Printf("Creating from '%s' for chat '%d': count=%d, mode=%d, alpha=%d, repeat=%d, resolution=%d, extension=%s",
-			op.ImgPath, op.ChatID, op.Config.Iterations, op.Config.Shape, op.Config.Alpha, op.Config.Repeat, op.Config.OutputSize, op.Config.Extension)
-
-		// create primitive
-		outputPath := fmt.Sprintf("%s/%d_%d.%s", app.outDir, op.ChatID, start.Unix(), op.Config.Extension)
-		err := op.Config.Create(op.ImgPath, outputPath)
-		if err != nil {
-			app.serverError(op.ChatID, err)
-			return
-		}
-		app.infoLog.Printf("Finished creating '%s' for chat '%d'; Output: '%s'; Time: %.1f seconds",
-			filepath.Base(op.ImgPath), op.ChatID, filepath.Base(outputPath), time.Since(start).Seconds())
-
-		// send output to the user
-		err = app.bot.SendDocument(op.ChatID, outputPath)
-		if err != nil {
-			app.serverError(op.ChatID, err)
-			return
-		}
-		app.infoLog.Printf("Sent result '%s' to the chat '%d'", filepath.Base(outputPath), op.ChatID)
-
-		// remove operation from the queue
-		app.queue.Dequeue()
-	}
 }
