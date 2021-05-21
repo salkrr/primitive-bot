@@ -52,7 +52,7 @@ func main() {
 		outDir:          *outDir,
 		operationsLimit: *operationsLimit,
 		bot:             &telegram.Bot{Token: *token},
-		sessions:        sessions.New(),
+		sessions:        sessions.NewActiveSessions(),
 		queue:           queue.New(),
 	}
 

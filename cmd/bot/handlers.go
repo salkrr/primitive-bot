@@ -4,24 +4,12 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/lazy-void/primitive-bot/pkg/menu"
+
 	"github.com/lazy-void/primitive-bot/pkg/primitive"
 	"github.com/lazy-void/primitive-bot/pkg/queue"
 	"github.com/lazy-void/primitive-bot/pkg/sessions"
 	"github.com/lazy-void/primitive-bot/pkg/telegram"
-)
-
-const (
-	rootMenuCallback     = "/"
-	createButtonCallback = "/create"
-	shapesButtonCallback = "/shape"
-	iterButtonCallback   = "/iter"
-	iterInputCallback    = "/iter/input"
-	repButtonCallback    = "/rep"
-	alphaButtonCallback  = "/alpha"
-	alphaInputCallback   = "/alpha/input"
-	extButtonCallback    = "/ext"
-	sizeButtonCallback   = "/size"
-	sizeInputCallback    = "/size/input"
 )
 
 func (app *application) handleMessage(m telegram.Message) {
@@ -40,7 +28,7 @@ func (app *application) handleMessage(m telegram.Message) {
 	if m.Text == "/status" {
 		operations, positions := app.queue.GetOperations(s.ChatID)
 		if len(operations) == 0 {
-			_, err := app.bot.SendMessage(m.Chat.ID, statusEmptyMessage)
+			_, err := app.bot.SendMessage(m.Chat.ID, StatusEmptyMessage)
 			if err != nil {
 				app.serverError(m.Chat.ID, err)
 			}
@@ -59,7 +47,7 @@ func (app *application) handleMessage(m telegram.Message) {
 	}
 
 	// Send help message
-	_, err := app.bot.SendMessage(m.Chat.ID, helpMessage)
+	_, err := app.bot.SendMessage(m.Chat.ID, HelpMessage)
 	if err != nil {
 		app.serverError(m.Chat.ID, err)
 	}
@@ -104,18 +92,12 @@ func (app *application) handlePhotoMessage(m telegram.Message) {
 	}
 
 	// Create session
-	msg, err := app.bot.SendMessage(m.Chat.ID, rootMenuText, rootKeyboard)
+	msg, err := app.bot.SendMessage(m.Chat.ID, menu.RootActivityTmpl.Text, menu.RootActivityTmpl.Keyboard)
 	if err != nil {
 		app.serverError(m.Chat.ID, err)
 		return
 	}
-	app.sessions.Set(m.From.ID, sessions.Session{
-		ChatID:        m.Chat.ID,
-		MenuMessageID: msg.MessageID,
-		InChan:        nil,
-		ImgPath:       path,
-		Config:        primitive.NewConfig(),
-	})
+	app.sessions.Set(m.From.ID, sessions.NewSession(m.Chat.ID, msg.MessageID, path))
 }
 
 func (app *application) handleCallbackQuery(q telegram.CallbackQuery) {
@@ -137,15 +119,12 @@ func (app *application) handleCallbackQuery(q telegram.CallbackQuery) {
 	var num int
 	var slug string
 	switch {
-	case match(q.Data, rootMenuCallback):
-		err := app.bot.EditMessageText(q.Message.Chat.ID, q.Message.MessageID, rootMenuText, rootKeyboard)
-		if err != nil {
-			app.serverError(s.ChatID, err)
-		}
-	case match(q.Data, createButtonCallback):
+	case match(q.Data, menu.RootMenuCallback):
+		app.showActivity(s.ChatID, s.MenuMessageID, s.Menu.RootActivity)
+	case match(q.Data, menu.CreateButtonCallback):
 		n := app.queue.GetNumOperations(s.ChatID)
 		if n >= app.operationsLimit {
-			if _, err := app.bot.SendMessage(s.ChatID, operationsLimitMessage); err != nil {
+			if _, err := app.bot.SendMessage(s.ChatID, OperationsLimitMessage); err != nil {
 				app.serverError(s.ChatID, err)
 			}
 			return
@@ -160,20 +139,21 @@ func (app *application) handleCallbackQuery(q telegram.CallbackQuery) {
 		if err != nil {
 			app.serverError(s.ChatID, err)
 		}
-	case match(q.Data, shapesButtonCallback):
-		selected := fmt.Sprintf("%s/%d", shapesButtonCallback, s.Config.Shape)
-		app.showMenu(q.Message.Chat.ID, q.Message.MessageID, selected, shapesMenuText, shapesKeyboard)
-	case match(q.Data, fmt.Sprintf("%s/([0-8])", shapesButtonCallback), &num):
+	case match(q.Data, menu.ShapesButtonCallback):
+		app.showActivity(s.ChatID, s.MenuMessageID, s.Menu.ShapesActivity)
+	case match(q.Data, fmt.Sprintf("%s/([0-8])", menu.ShapesButtonCallback), &num):
 		s.Config.Shape = primitive.Shape(num)
 		app.sessions.Set(q.From.ID, s)
 
 		// update menu
-		selected := fmt.Sprintf("%s/%d", shapesButtonCallback, s.Config.Shape)
-		app.showMenu(q.Message.Chat.ID, q.Message.MessageID, selected, shapesMenuText, shapesKeyboard)
-	case match(q.Data, iterButtonCallback):
-		selected := fmt.Sprintf("%s/%d", iterButtonCallback, s.Config.Iterations)
-		app.showMenu(q.Message.Chat.ID, q.Message.MessageID, selected, iterMenuText, iterKeyboard)
-	case match(q.Data, fmt.Sprintf("%s/([0-9]+)", iterButtonCallback), &num):
+		selected := fmt.Sprintf("%s/%d", menu.ShapesButtonCallback, s.Config.Shape)
+		s.Menu.ShapesActivity = menu.NewMenuActivity(menu.ShapesActivityTmpl, selected)
+		app.sessions.Set(q.From.ID, s)
+
+		app.showActivity(s.ChatID, s.MenuMessageID, s.Menu.ShapesActivity)
+	case match(q.Data, menu.IterButtonCallback):
+		app.showActivity(s.ChatID, s.MenuMessageID, s.Menu.IterActivity)
+	case match(q.Data, fmt.Sprintf("%s/([0-9]+)", menu.IterButtonCallback), &num):
 		if num > 5000 {
 			return
 		}
@@ -181,24 +161,29 @@ func (app *application) handleCallbackQuery(q telegram.CallbackQuery) {
 		app.sessions.Set(q.From.ID, s)
 
 		// update menu
-		selected := fmt.Sprintf("%s/%d", iterButtonCallback, s.Config.Iterations)
-		app.showMenu(q.Message.Chat.ID, q.Message.MessageID, selected, iterMenuText, iterKeyboard)
-	case match(q.Data, iterInputCallback):
+		// update menu
+		selected := fmt.Sprintf("%s/%d", menu.IterButtonCallback, s.Config.Iterations)
+		s.Menu.IterActivity = menu.NewMenuActivity(menu.IterActivityTmpl, selected)
+		app.sessions.Set(q.From.ID, s)
+
+		app.showActivity(s.ChatID, s.MenuMessageID, s.Menu.IterActivity)
+	case match(q.Data, menu.IterInputCallback):
 		app.handleIterInput(q, s)
-	case match(q.Data, repButtonCallback):
-		selected := fmt.Sprintf("%s/%d", repButtonCallback, s.Config.Repeat)
-		app.showMenu(q.Message.Chat.ID, q.Message.MessageID, selected, repMenuText, repKeyboard)
-	case match(q.Data, fmt.Sprintf("%s/([1-6])", repButtonCallback), &num):
+	case match(q.Data, menu.RepButtonCallback):
+		app.showActivity(s.ChatID, s.MenuMessageID, s.Menu.RepActivity)
+	case match(q.Data, fmt.Sprintf("%s/([1-6])", menu.RepButtonCallback), &num):
 		s.Config.Repeat = num
 		app.sessions.Set(q.From.ID, s)
 
 		// update menu
-		selected := fmt.Sprintf("%s/%d", repButtonCallback, s.Config.Repeat)
-		app.showMenu(q.Message.Chat.ID, q.Message.MessageID, selected, repMenuText, repKeyboard)
-	case match(q.Data, alphaButtonCallback):
-		selected := fmt.Sprintf("%s/%d", alphaButtonCallback, s.Config.Alpha)
-		app.showMenu(q.Message.Chat.ID, q.Message.MessageID, selected, alphaMenuText, alphaKeyboard)
-	case match(q.Data, fmt.Sprintf("%s/([0-9]+)", alphaButtonCallback), &num):
+		selected := fmt.Sprintf("%s/%d", menu.RepButtonCallback, s.Config.Repeat)
+		s.Menu.RepActivity = menu.NewMenuActivity(menu.RepActivityTmpl, selected)
+		app.sessions.Set(q.From.ID, s)
+
+		app.showActivity(s.ChatID, s.MenuMessageID, s.Menu.RepActivity)
+	case match(q.Data, menu.AlphaButtonCallback):
+		app.showActivity(s.ChatID, s.MenuMessageID, s.Menu.AlphaActivity)
+	case match(q.Data, fmt.Sprintf("%s/([0-9]+)", menu.AlphaButtonCallback), &num):
 		if num < 0 || num > 255 {
 			return
 		}
@@ -206,24 +191,28 @@ func (app *application) handleCallbackQuery(q telegram.CallbackQuery) {
 		app.sessions.Set(q.From.ID, s)
 
 		// update menu
-		selected := fmt.Sprintf("%s/%d", alphaButtonCallback, s.Config.Alpha)
-		app.showMenu(q.Message.Chat.ID, q.Message.MessageID, selected, alphaMenuText, alphaKeyboard)
-	case match(q.Data, alphaInputCallback):
+		selected := fmt.Sprintf("%s/%d", menu.AlphaButtonCallback, s.Config.Alpha)
+		s.Menu.AlphaActivity = menu.NewMenuActivity(menu.AlphaActivityTmpl, selected)
+		app.sessions.Set(q.From.ID, s)
+
+		app.showActivity(s.ChatID, s.MenuMessageID, s.Menu.AlphaActivity)
+	case match(q.Data, menu.AlphaInputCallback):
 		app.handleAlphaInput(q, s)
-	case match(q.Data, extButtonCallback):
-		selected := fmt.Sprintf("%s/%s", extButtonCallback, s.Config.Extension)
-		app.showMenu(q.Message.Chat.ID, q.Message.MessageID, selected, extMenuText, extKeyboard)
-	case match(q.Data, fmt.Sprintf("%s/(jpg|png|svg|gif)", extButtonCallback), &slug):
+	case match(q.Data, menu.ExtButtonCallback):
+		app.showActivity(s.ChatID, s.MenuMessageID, s.Menu.ExtActivity)
+	case match(q.Data, fmt.Sprintf("%s/(jpg|png|svg|gif)", menu.ExtButtonCallback), &slug):
 		s.Config.Extension = primitive.Extension(slug)
 		app.sessions.Set(q.From.ID, s)
 
 		// update menu
-		selected := fmt.Sprintf("%s/%s", extButtonCallback, s.Config.Extension)
-		app.showMenu(q.Message.Chat.ID, q.Message.MessageID, selected, extMenuText, extKeyboard)
-	case match(q.Data, sizeButtonCallback):
-		selected := fmt.Sprintf("%s/%d", sizeButtonCallback, s.Config.OutputSize)
-		app.showMenu(q.Message.Chat.ID, q.Message.MessageID, selected, sizeMenuText, sizeKeyboard)
-	case match(q.Data, fmt.Sprintf("%s/([0-9]+)", sizeButtonCallback), &num):
+		selected := fmt.Sprintf("%s/%s", menu.ExtButtonCallback, s.Config.Extension)
+		s.Menu.ExtActivity = menu.NewMenuActivity(menu.ExtActivityTmpl, selected)
+		app.sessions.Set(q.From.ID, s)
+
+		app.showActivity(s.ChatID, s.MenuMessageID, s.Menu.ExtActivity)
+	case match(q.Data, menu.SizeButtonCallback):
+		app.showActivity(s.ChatID, s.MenuMessageID, s.Menu.SizeActivity)
+	case match(q.Data, fmt.Sprintf("%s/([0-9]+)", menu.SizeButtonCallback), &num):
 		if num < 256 || num > 1920 {
 			return
 		}
@@ -231,9 +220,12 @@ func (app *application) handleCallbackQuery(q telegram.CallbackQuery) {
 		app.sessions.Set(q.From.ID, s)
 
 		// update menu
-		selected := fmt.Sprintf("%s/%d", sizeButtonCallback, s.Config.OutputSize)
-		app.showMenu(q.Message.Chat.ID, q.Message.MessageID, selected, sizeMenuText, sizeKeyboard)
-	case match(q.Data, sizeInputCallback):
+		selected := fmt.Sprintf("%s/%d", menu.SizeButtonCallback, s.Config.OutputSize)
+		s.Menu.SizeActivity = menu.NewMenuActivity(menu.SizeActivityTmpl, selected)
+		app.sessions.Set(q.From.ID, s)
+
+		app.showActivity(s.ChatID, s.MenuMessageID, s.Menu.SizeActivity)
+	case match(q.Data, menu.SizeInputCallback):
 		app.handleSizeInput(q, s)
 	}
 }
@@ -256,9 +248,12 @@ func (app *application) handleIterInput(
 	app.sessions.Set(q.From.ID, s)
 	close(in)
 
-	buttonText := fmt.Sprintf("%s (%d)", otherButtonText, s.Config.Iterations)
-	app.showMenu(q.Message.Chat.ID, q.Message.MessageID, iterInputCallback,
-		iterMenuText, iterKeyboard, buttonText)
+	buttonText := fmt.Sprintf("%s (%d)", menu.OtherButtonText, s.Config.Iterations)
+	s.Menu.IterActivity = menu.NewMenuActivity(
+		menu.IterActivityTmpl, menu.IterInputCallback, buttonText)
+	app.sessions.Set(q.From.ID, s)
+
+	app.showActivity(q.Message.Chat.ID, q.Message.MessageID, s.Menu.IterActivity)
 }
 
 func (app *application) handleAlphaInput(
@@ -279,9 +274,12 @@ func (app *application) handleAlphaInput(
 	app.sessions.Set(q.From.ID, s)
 	close(in)
 
-	buttonText := fmt.Sprintf("%s (%d)", otherButtonText, s.Config.Alpha)
-	app.showMenu(q.Message.Chat.ID, q.Message.MessageID, alphaInputCallback,
-		alphaMenuText, alphaKeyboard, buttonText)
+	buttonText := fmt.Sprintf("%s (%d)", menu.OtherButtonText, s.Config.Alpha)
+	s.Menu.AlphaActivity = menu.NewMenuActivity(
+		menu.AlphaActivityTmpl, menu.AlphaInputCallback, buttonText)
+	app.sessions.Set(q.From.ID, s)
+
+	app.showActivity(q.Message.Chat.ID, q.Message.MessageID, s.Menu.AlphaActivity)
 }
 
 func (app *application) handleSizeInput(
@@ -302,7 +300,10 @@ func (app *application) handleSizeInput(
 	app.sessions.Set(q.From.ID, s)
 	close(in)
 
-	buttonText := fmt.Sprintf("%s (%d)", otherButtonText, s.Config.OutputSize)
-	app.showMenu(q.Message.Chat.ID, q.Message.MessageID, sizeInputCallback,
-		sizeMenuText, sizeKeyboard, buttonText)
+	buttonText := fmt.Sprintf("%s (%d)", menu.OtherButtonText, s.Config.OutputSize)
+	s.Menu.SizeActivity = menu.NewMenuActivity(
+		menu.SizeActivityTmpl, menu.SizeInputCallback, buttonText)
+	app.sessions.Set(q.From.ID, s)
+
+	app.showActivity(q.Message.Chat.ID, q.Message.MessageID, s.Menu.SizeActivity)
 }

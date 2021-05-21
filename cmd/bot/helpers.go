@@ -8,6 +8,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/lazy-void/primitive-bot/pkg/menu"
+
 	"github.com/lazy-void/primitive-bot/pkg/primitive"
 	"github.com/lazy-void/primitive-bot/pkg/telegram"
 )
@@ -20,14 +22,14 @@ func (app *application) serverError(chatID int64, err error) {
 		app.errorLog.Print(err)
 	}
 
-	_, err = app.bot.SendMessage(chatID, errorMessage)
+	_, err = app.bot.SendMessage(chatID, ErrorMessage)
 	if err != nil {
 		app.errorLog.Print(err)
 	}
 }
 
 func (app *application) createStatusMessage(c primitive.Config, position int) string {
-	return fmt.Sprintf(statusMessage, position, strings.ToLower(shapeNames[c.Shape]),
+	return fmt.Sprintf(StatusMessage, position, strings.ToLower(menu.ShapeNames[c.Shape]),
 		c.Iterations, c.Repeat, c.Alpha, c.Extension, c.OutputSize)
 }
 
@@ -38,7 +40,7 @@ func (app *application) getInputFromUser(
 	out chan int,
 ) {
 	err := app.bot.EditMessageText(chatID, menuMessageID,
-		fmt.Sprintf(inputMessage, min, max))
+		fmt.Sprintf(InputMessage, min, max))
 	if err != nil {
 		app.serverError(chatID, err)
 		return
@@ -60,7 +62,7 @@ func (app *application) getInputFromUser(
 		}
 
 		// incorrect input
-		err = app.bot.EditMessageText(chatID, menuMessageID, fmt.Sprintf(inputMessage, min, max))
+		err = app.bot.EditMessageText(chatID, menuMessageID, fmt.Sprintf(InputMessage, min, max))
 		if err != nil {
 			if strings.Contains(err.Error(), "400") {
 				// 400 error: message is not modified
@@ -73,20 +75,11 @@ func (app *application) getInputFromUser(
 	}
 }
 
-func (app *application) showMenu(
+func (app *application) showActivity(
 	chatID, messageID int64,
-	chosenCallback,
-	menuText string,
-	template telegram.InlineKeyboardMarkup,
-	params ...string,
+	activity menu.Activity,
 ) {
-	newName := ""
-	if len(params) > 0 {
-		newName = params[0]
-	}
-
-	keyboard := newKeyboardFromTemplate(template, chosenCallback, newName)
-	err := app.bot.EditMessageText(chatID, messageID, menuText, keyboard)
+	err := app.bot.EditMessageText(chatID, messageID, activity.Text, activity.Keyboard)
 	if err != nil {
 		if strings.Contains(err.Error(), "400") {
 			// 400 error: message is not modified
