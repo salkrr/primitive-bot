@@ -23,12 +23,12 @@ type Menu struct {
 }
 
 func New(c primitive.Config) Menu {
-	shapesCallback := fmt.Sprintf("%s/%d", ShapesButtonCallback, c.Shape)
-	iterCallback := fmt.Sprintf("%s/%d", IterButtonCallback, c.Iterations)
-	repCallback := fmt.Sprintf("%s/%d", RepButtonCallback, c.Repeat)
-	alphaCallback := fmt.Sprintf("%s/%d", AlphaButtonCallback, c.Alpha)
-	extCallback := fmt.Sprintf("%s/%s", ExtButtonCallback, c.Extension)
-	sizeCallback := fmt.Sprintf("%s/%d", SizeButtonCallback, c.OutputSize)
+	shapesCallback := fmt.Sprintf("%s/%d", ShapesActivityCallback, c.Shape)
+	iterCallback := fmt.Sprintf("%s/%d", IterActivityCallback, c.Iterations)
+	repCallback := fmt.Sprintf("%s/%d", RepActivityCallback, c.Repeat)
+	alphaCallback := fmt.Sprintf("%s/%d", AlphaActivityCallback, c.Alpha)
+	extCallback := fmt.Sprintf("%s/%s", ExtActivityCallback, c.Extension)
+	sizeCallback := fmt.Sprintf("%s/%d", SizeActivityCallback, c.OutputSize)
 
 	return Menu{
 		RootActivity:   NewMenuActivity(RootActivityTmpl, ""),

@@ -10,7 +10,7 @@ import (
 )
 
 type Session struct {
-	ChatID        int64
+	UserID        int64
 	MenuMessageID int64
 	InChan        chan<- telegram.Message
 	ImgPath       string
@@ -18,11 +18,11 @@ type Session struct {
 	Config        primitive.Config
 }
 
-func NewSession(chatID, menuMessageID int64, imgPath string) Session {
+func NewSession(userID, menuMessageID int64, imgPath string) Session {
 	c := primitive.NewConfig()
 
 	return Session{
-		ChatID:        chatID,
+		UserID:        userID,
 		MenuMessageID: menuMessageID,
 		ImgPath:       imgPath,
 		Menu:          menu.New(c),

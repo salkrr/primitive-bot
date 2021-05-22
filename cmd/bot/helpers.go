@@ -22,25 +22,25 @@ func (app *application) serverError(chatID int64, err error) {
 		app.errorLog.Print(err)
 	}
 
-	_, err = app.bot.SendMessage(chatID, ErrorMessage)
+	_, err = app.bot.SendMessage(chatID, errorMessage)
 	if err != nil {
 		app.errorLog.Print(err)
 	}
 }
 
 func (app *application) createStatusMessage(c primitive.Config, position int) string {
-	return fmt.Sprintf(StatusMessage, position, strings.ToLower(menu.ShapeNames[c.Shape]),
+	return fmt.Sprintf(statusMessage, position, strings.ToLower(menu.ShapeNames[c.Shape]),
 		c.Iterations, c.Repeat, c.Alpha, c.Extension, c.OutputSize)
 }
 
 func (app *application) getInputFromUser(
 	chatID, menuMessageID int64,
 	min, max int,
-	in chan telegram.Message,
-	out chan int,
+	in <-chan telegram.Message,
+	out chan<- int,
 ) {
 	err := app.bot.EditMessageText(chatID, menuMessageID,
-		fmt.Sprintf(InputMessage, min, max))
+		fmt.Sprintf(inputMessage, min, max))
 	if err != nil {
 		app.serverError(chatID, err)
 		return
@@ -62,7 +62,7 @@ func (app *application) getInputFromUser(
 		}
 
 		// incorrect input
-		err = app.bot.EditMessageText(chatID, menuMessageID, fmt.Sprintf(InputMessage, min, max))
+		err = app.bot.EditMessageText(chatID, menuMessageID, fmt.Sprintf(inputMessage, min, max))
 		if err != nil {
 			if strings.Contains(err.Error(), "400") {
 				// 400 error: message is not modified
@@ -75,7 +75,7 @@ func (app *application) getInputFromUser(
 	}
 }
 
-func (app *application) showActivity(
+func (app *application) showMenuActivity(
 	chatID, messageID int64,
 	activity menu.Activity,
 ) {
