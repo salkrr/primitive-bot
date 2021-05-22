@@ -7,7 +7,7 @@ import (
 
 	"github.com/lazy-void/primitive-bot/pkg/queue"
 	"github.com/lazy-void/primitive-bot/pkg/sessions"
-	"github.com/lazy-void/primitive-bot/pkg/telegram"
+	"github.com/lazy-void/primitive-bot/pkg/tg"
 )
 
 type application struct {
@@ -16,7 +16,7 @@ type application struct {
 	inDir           string
 	outDir          string
 	operationsLimit int
-	bot             *telegram.Bot
+	bot             *tg.Bot
 	sessions        *sessions.ActiveSessions
 	queue           *queue.Queue
 }
@@ -48,7 +48,7 @@ func main() {
 		inDir:           *inDir,
 		outDir:          *outDir,
 		operationsLimit: *operationsLimit,
-		bot:             &telegram.Bot{Token: *token},
+		bot:             &tg.Bot{Token: *token},
 		sessions:        sessions.NewActiveSessions(),
 		queue:           queue.New(),
 	}

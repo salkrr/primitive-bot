@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/lazy-void/primitive-bot/pkg/primitive"
-	"github.com/lazy-void/primitive-bot/pkg/telegram"
+	"github.com/lazy-void/primitive-bot/pkg/tg"
 )
 
 var (
-	rootKeyboardTmpl = telegram.InlineKeyboardMarkup{
-		InlineKeyboard: [][]telegram.InlineKeyboardButton{
+	rootKeyboardTmpl = tg.InlineKeyboardMarkup{
+		InlineKeyboard: [][]tg.InlineKeyboardButton{
 			{
 				{Text: createButtonText, CallbackData: CreateButtonCallback},
 			},
@@ -28,8 +28,8 @@ var (
 		},
 	}
 
-	shapesKeyboardTmpl = telegram.InlineKeyboardMarkup{
-		InlineKeyboard: [][]telegram.InlineKeyboardButton{
+	shapesKeyboardTmpl = tg.InlineKeyboardMarkup{
+		InlineKeyboard: [][]tg.InlineKeyboardButton{
 			{
 				{
 					Text:         ShapeNames[primitive.ShapeAny],
@@ -93,8 +93,8 @@ var (
 		},
 	}
 
-	iterKeyboardTmpl = telegram.InlineKeyboardMarkup{
-		InlineKeyboard: [][]telegram.InlineKeyboardButton{
+	iterKeyboardTmpl = tg.InlineKeyboardMarkup{
+		InlineKeyboard: [][]tg.InlineKeyboardButton{
 			{
 				{Text: "100", CallbackData: fmt.Sprintf("%s/100", IterActivityCallback)},
 				{Text: "200", CallbackData: fmt.Sprintf("%s/200", IterActivityCallback)},
@@ -114,8 +114,8 @@ var (
 		},
 	}
 
-	repKeyboardTmpl = telegram.InlineKeyboardMarkup{
-		InlineKeyboard: [][]telegram.InlineKeyboardButton{
+	repKeyboardTmpl = tg.InlineKeyboardMarkup{
+		InlineKeyboard: [][]tg.InlineKeyboardButton{
 			{
 				{Text: "1", CallbackData: fmt.Sprintf("%s/1", RepActivityCallback)},
 				{Text: "2", CallbackData: fmt.Sprintf("%s/2", RepActivityCallback)},
@@ -132,8 +132,8 @@ var (
 		},
 	}
 
-	alphaKeyboardTmpl = telegram.InlineKeyboardMarkup{
-		InlineKeyboard: [][]telegram.InlineKeyboardButton{
+	alphaKeyboardTmpl = tg.InlineKeyboardMarkup{
+		InlineKeyboard: [][]tg.InlineKeyboardButton{
 			{
 				{Text: autoButtonText, CallbackData: fmt.Sprintf("%s/0", AlphaActivityCallback)},
 			},
@@ -152,8 +152,8 @@ var (
 		},
 	}
 
-	extKeyboardTmpl = telegram.InlineKeyboardMarkup{
-		InlineKeyboard: [][]telegram.InlineKeyboardButton{
+	extKeyboardTmpl = tg.InlineKeyboardMarkup{
+		InlineKeyboard: [][]tg.InlineKeyboardButton{
 			{
 				{Text: "jpg", CallbackData: fmt.Sprintf("%s/jpg", ExtActivityCallback)},
 				{Text: "png", CallbackData: fmt.Sprintf("%s/png", ExtActivityCallback)},
@@ -167,8 +167,8 @@ var (
 		},
 	}
 
-	sizeKeyboardTmpl = telegram.InlineKeyboardMarkup{
-		InlineKeyboard: [][]telegram.InlineKeyboardButton{
+	sizeKeyboardTmpl = tg.InlineKeyboardMarkup{
+		InlineKeyboard: [][]tg.InlineKeyboardButton{
 			{
 				{Text: "256", CallbackData: fmt.Sprintf("%s/256", SizeActivityCallback)},
 				{Text: "512", CallbackData: fmt.Sprintf("%s/512", SizeActivityCallback)},
@@ -236,10 +236,10 @@ func NewMenuActivity(
 	checkSymbol := "👉"
 
 	// Create new Keyboard
-	newKeyboard := telegram.InlineKeyboardMarkup{}
-	newKeyboard.InlineKeyboard = make([][]telegram.InlineKeyboardButton, len(template.Keyboard.InlineKeyboard))
+	newKeyboard := tg.InlineKeyboardMarkup{}
+	newKeyboard.InlineKeyboard = make([][]tg.InlineKeyboardButton, len(template.Keyboard.InlineKeyboard))
 	for i, row := range template.Keyboard.InlineKeyboard {
-		newKeyboard.InlineKeyboard[i] = make([]telegram.InlineKeyboardButton, len(row))
+		newKeyboard.InlineKeyboard[i] = make([]tg.InlineKeyboardButton, len(row))
 		for j, button := range row {
 			newKeyboard.InlineKeyboard[i][j] = button
 

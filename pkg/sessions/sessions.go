@@ -6,13 +6,13 @@ import (
 	"github.com/lazy-void/primitive-bot/pkg/menu"
 
 	"github.com/lazy-void/primitive-bot/pkg/primitive"
-	"github.com/lazy-void/primitive-bot/pkg/telegram"
+	"github.com/lazy-void/primitive-bot/pkg/tg"
 )
 
 type Session struct {
 	UserID        int64
 	MenuMessageID int64
-	InChan        chan<- telegram.Message
+	InChan        chan<- tg.Message
 	ImgPath       string
 	Menu          menu.Menu
 	Config        primitive.Config

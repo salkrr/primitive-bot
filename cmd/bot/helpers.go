@@ -11,7 +11,7 @@ import (
 	"github.com/lazy-void/primitive-bot/pkg/menu"
 
 	"github.com/lazy-void/primitive-bot/pkg/primitive"
-	"github.com/lazy-void/primitive-bot/pkg/telegram"
+	"github.com/lazy-void/primitive-bot/pkg/tg"
 )
 
 func (app *application) serverError(chatID int64, err error) {
@@ -36,7 +36,7 @@ func (app *application) createStatusMessage(c primitive.Config, position int) st
 func (app *application) getInputFromUser(
 	chatID, menuMessageID int64,
 	min, max int,
-	in <-chan telegram.Message,
+	in <-chan tg.Message,
 	out chan<- int,
 ) {
 	err := app.bot.EditMessageText(chatID, menuMessageID,

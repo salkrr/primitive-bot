@@ -9,7 +9,7 @@ import (
 	"github.com/lazy-void/primitive-bot/pkg/menu"
 
 	"github.com/lazy-void/primitive-bot/pkg/sessions"
-	"github.com/lazy-void/primitive-bot/pkg/telegram"
+	"github.com/lazy-void/primitive-bot/pkg/tg"
 )
 
 func (app *application) showRootMenuActivity(s sessions.Session) {
@@ -72,7 +72,7 @@ func (app *application) handleIterButton(s sessions.Session, n int) {
 }
 
 func (app *application) handleIterInput(s sessions.Session) {
-	in := make(chan telegram.Message)
+	in := make(chan tg.Message)
 	out := make(chan int)
 
 	// Get user input
@@ -132,7 +132,7 @@ func (app *application) handleAlphaButton(s sessions.Session, n int) {
 }
 
 func (app *application) handleAlphaInput(s sessions.Session) {
-	in := make(chan telegram.Message)
+	in := make(chan tg.Message)
 	out := make(chan int)
 
 	// Get user input
@@ -190,7 +190,7 @@ func (app *application) handleSizeButton(s sessions.Session, n int) {
 }
 
 func (app *application) handleSizeInput(s sessions.Session) {
-	in := make(chan telegram.Message)
+	in := make(chan tg.Message)
 	out := make(chan int)
 
 	// Get user input

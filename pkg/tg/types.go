@@ -1,4 +1,4 @@
-package telegram
+package tg
 
 type InlineKeyboardButton struct {
 	Text         string `json:"text"`

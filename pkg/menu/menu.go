@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/lazy-void/primitive-bot/pkg/primitive"
-	"github.com/lazy-void/primitive-bot/pkg/telegram"
+	"github.com/lazy-void/primitive-bot/pkg/tg"
 )
 
 type Activity struct {
 	Text     string
-	Keyboard telegram.InlineKeyboardMarkup
+	Keyboard tg.InlineKeyboardMarkup
 }
 
 type Menu struct {

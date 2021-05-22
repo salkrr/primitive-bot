@@ -8,7 +8,7 @@ import (
 
 	"github.com/lazy-void/primitive-bot/pkg/menu"
 	"github.com/lazy-void/primitive-bot/pkg/sessions"
-	"github.com/lazy-void/primitive-bot/pkg/telegram"
+	"github.com/lazy-void/primitive-bot/pkg/tg"
 )
 
 func (app *application) listenAndServe() {
@@ -83,7 +83,7 @@ func (app *application) worker() {
 	}
 }
 
-func (app *application) processMessage(m telegram.Message) {
+func (app *application) processMessage(m tg.Message) {
 	if m.Photo != nil {
 		app.processPhoto(m)
 		return
@@ -122,7 +122,7 @@ func (app *application) processMessage(m telegram.Message) {
 	}
 }
 
-func (app *application) processPhoto(m telegram.Message) {
+func (app *application) processPhoto(m tg.Message) {
 	// If we already have session - delete it's menu
 	s, ok := app.sessions.Get(m.From.ID)
 	if ok {
@@ -148,9 +148,9 @@ func (app *application) processPhoto(m telegram.Message) {
 	app.sessions.Set(m.From.ID, sessions.NewSession(m.From.ID, msg.MessageID, path))
 }
 
-func (app *application) downloadPhoto(photos []telegram.PhotoSize) (string, error) {
+func (app *application) downloadPhoto(photos []tg.PhotoSize) (string, error) {
 	// Choose smallest image with dimensions >= 256
-	var file telegram.PhotoSize
+	var file tg.PhotoSize
 	for _, photo := range photos {
 		file = photo
 		if photo.Width >= 256 && photo.Height >= 256 {
@@ -177,7 +177,7 @@ func (app *application) downloadPhoto(photos []telegram.PhotoSize) (string, erro
 	return path, nil
 }
 
-func (app *application) processCallbackQuery(q telegram.CallbackQuery) {
+func (app *application) processCallbackQuery(q tg.CallbackQuery) {
 	defer app.bot.AnswerCallbackQuery(q.ID, "")
 
 	s, ok := app.sessions.Get(q.From.ID)

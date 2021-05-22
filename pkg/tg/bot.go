@@ -1,5 +1,5 @@
-// Package telegram implements some of the Telegram API methods
-package telegram
+// Package tg implements some of the Telegram API methods
+package tg
 
 import (
 	"bytes"
@@ -271,8 +271,8 @@ func (b *Bot) GetFile(fileID string) (File, error) {
 	return result, nil
 }
 
-func (s *Bot) DownloadFile(fileID string) ([]byte, error) {
-	file, err := s.GetFile(fileID)
+func (b *Bot) DownloadFile(fileID string) ([]byte, error) {
+	file, err := b.GetFile(fileID)
 	if err != nil {
 		return nil, err
 	}
@@ -281,7 +281,7 @@ func (s *Bot) DownloadFile(fileID string) ([]byte, error) {
 		return nil, fmt.Errorf("file doesn't have an ID")
 	}
 
-	u, err := url.Parse(fmt.Sprintf("%s%s/%s", baseFileURL, s.Token, file.FilePath))
+	u, err := url.Parse(fmt.Sprintf("%s%s/%s", baseFileURL, b.Token, file.FilePath))
 	if err != nil {
 		return nil, err
 	}
