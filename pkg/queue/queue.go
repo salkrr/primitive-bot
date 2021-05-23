@@ -11,7 +11,7 @@ import (
 // Operation contains information needed to create
 // primitive image.
 type Operation struct {
-	ChatID  int64
+	UserID  int64
 	ImgPath string
 	Config  primitive.Config
 }
@@ -74,15 +74,15 @@ func (q *Queue) Peek() (Operation, bool) {
 
 // GetOperations returns operation with the given chatID and also the slice which
 // contains positions of these operations.
-func (q *Queue) GetOperations(chatID int64) ([]Operation, []int) {
+func (q *Queue) GetOperations(userID int64) ([]Operation, []int) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
-	operations := []Operation{}
-	positions := []int{}
+	var operations []Operation
+	var positions []int
 	for i, e := 1, q.elements.Front(); e != nil; i, e = i+1, e.Next() {
 		op := e.Value.(Operation)
-		if op.ChatID == chatID {
+		if op.UserID == userID {
 			operations = append(operations, op)
 			positions = append(positions, i)
 		}
@@ -99,7 +99,7 @@ func (q *Queue) GetNumOperations(chatID int64) int {
 	counter := 0
 	for i, e := 1, q.elements.Front(); e != nil; i, e = i+1, e.Next() {
 		op := e.Value.(Operation)
-		if op.ChatID == chatID {
+		if op.UserID == chatID {
 			counter++
 		}
 	}

@@ -25,11 +25,14 @@ func (app *application) handleCreateButton(s sessions.Session) {
 		return
 	}
 
+	app.infoLog.Printf(enqueuedLogMessage, s.UserID, s.ImgPath, s.Config.Iterations, s.Config.Shape,
+		s.Config.Alpha, s.Config.Repeat, s.Config.OutputSize, s.Config.Extension)
 	pos := app.queue.Enqueue(queue.Operation{
-		ChatID:  s.UserID,
+		UserID:  s.UserID,
 		ImgPath: s.ImgPath,
 		Config:  s.Config,
 	})
+
 	_, err := app.bot.SendMessage(s.UserID, app.createStatusMessage(s.Config, pos))
 	if err != nil {
 		app.serverError(s.UserID, err)

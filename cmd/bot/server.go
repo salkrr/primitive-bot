@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/lazy-void/primitive-bot/pkg/menu"
@@ -29,13 +28,13 @@ func (app *application) listenAndServe() {
 
 		for _, u := range updates {
 			if u.Message.MessageID > 0 {
-				app.infoLog.Printf("Got message with text '%s' from the user '%s' with ID '%d'",
+				app.infoLog.Printf("Message: text '%s' from the user '%s' with the ID '%d'",
 					u.Message.Text, u.Message.From.FirstName, u.Message.From.ID)
 				go app.processMessage(u.Message)
 				continue
 			}
 
-			app.infoLog.Printf("Got callback query with data '%s' from the user '%s' with ID '%d'",
+			app.infoLog.Printf("Callback Query: data '%s' from the user '%s' with the ID '%d'",
 				u.CallbackQuery.Data, u.CallbackQuery.From.FirstName, u.CallbackQuery.From.ID)
 			go app.processCallbackQuery(u.CallbackQuery)
 		}
@@ -56,27 +55,26 @@ func (app *application) worker() {
 			continue
 		}
 
-		start := time.Now()
-		app.infoLog.Printf("Creating from '%s' for chat '%d': count=%d, mode=%d, alpha=%d, repeat=%d, resolution=%d, extension=%s",
-			op.ImgPath, op.ChatID, op.Config.Iterations, op.Config.Shape, op.Config.Alpha, op.Config.Repeat, op.Config.OutputSize, op.Config.Extension)
-
 		// create primitive
-		outputPath := fmt.Sprintf("%s/%d_%d.%s", app.outDir, op.ChatID, start.Unix(), op.Config.Extension)
+		start := time.Now()
+		outputPath := fmt.Sprintf("%s/%d_%d.%s", app.outDir, op.UserID, start.Unix(), op.Config.Extension)
+		app.infoLog.Printf(creatingLogMessage, op.UserID, op.ImgPath, outputPath, op.Config.Iterations, op.Config.Shape,
+			op.Config.Alpha, op.Config.Repeat, op.Config.OutputSize, op.Config.Extension)
+
 		err := op.Config.Create(op.ImgPath, outputPath)
 		if err != nil {
-			app.serverError(op.ChatID, err)
+			app.serverError(op.UserID, err)
 			return
 		}
-		app.infoLog.Printf("Finished creating '%s' for chat '%d'; Output: '%s'; Time: %.1f seconds",
-			filepath.Base(op.ImgPath), op.ChatID, filepath.Base(outputPath), time.Since(start).Seconds())
+		app.infoLog.Printf(finishedLogMessage, op.UserID, op.ImgPath, outputPath, time.Since(start).Seconds())
 
 		// send output to the user
-		err = app.bot.SendDocument(op.ChatID, outputPath)
+		err = app.bot.SendDocument(op.UserID, outputPath)
 		if err != nil {
-			app.serverError(op.ChatID, err)
+			app.serverError(op.UserID, err)
 			return
 		}
-		app.infoLog.Printf("Sent result '%s' to the chat '%d'", filepath.Base(outputPath), op.ChatID)
+		app.infoLog.Printf(sentLogMessage, op.UserID, outputPath)
 
 		// remove operation from the queue
 		app.queue.Dequeue()
@@ -97,7 +95,7 @@ func (app *application) processMessage(m tg.Message) {
 	}
 
 	if m.Text == "/status" {
-		operations, positions := app.queue.GetOperations(s.UserID)
+		operations, positions := app.queue.GetOperations(m.From.ID)
 		if len(operations) == 0 {
 			_, err := app.bot.SendMessage(m.Chat.ID, statusEmptyMessage)
 			if err != nil {
@@ -113,6 +111,7 @@ func (app *application) processMessage(m tg.Message) {
 				return
 			}
 		}
+		return
 	}
 
 	// Send help message
