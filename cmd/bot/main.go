@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -41,7 +42,10 @@ func main() {
 
 	q := queue.New()
 	if *logPath != "" {
-		restoreQueue(*logPath, q)
+		err := restoreQueue(*logPath, q)
+		if err != nil {
+			log.Fatalf("Error restoring queue from the log: %s", err)
+		}
 	}
 
 	if err := os.MkdirAll(*inDir, 0664); err != nil {
@@ -69,12 +73,14 @@ func main() {
 	app.listenAndServe()
 }
 
-func restoreQueue(logPath string, q *queue.Queue) {
-	f, err := os.Open(logPath)
+func restoreQueue(logPath string, q *queue.Queue) (err error) {
+	f, err := os.Open(filepath.Clean(logPath))
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	defer f.Close()
+	defer func() {
+		err = f.Close()
+	}()
 
 	regex := regexp.MustCompile(`INFO\t\b.*?\b \b.*?\b (.*)`)
 	scanner := bufio.NewScanner(f)
@@ -92,7 +98,7 @@ func restoreQueue(logPath string, q *queue.Queue) {
 				&op.Config.Iterations, &op.Config.Shape, &op.Config.Alpha,
 				&op.Config.Repeat, &op.Config.OutputSize, &op.Config.Extension)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			q.Enqueue(op)
@@ -104,7 +110,5 @@ func restoreQueue(logPath string, q *queue.Queue) {
 		}
 	}
 
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
+	return scanner.Err()
 }

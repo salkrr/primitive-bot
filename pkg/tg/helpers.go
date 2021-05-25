@@ -9,11 +9,13 @@ import (
 )
 
 func createMultipartForm(paramName, path string) (*multipart.Writer, *bytes.Buffer, error) {
-	file, err := os.Open(path)
+	file, err := os.Open(filepath.Clean(path))
 	if err != nil {
 		return nil, nil, err
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	body := &bytes.Buffer{}
 	w := multipart.NewWriter(body)
@@ -31,5 +33,5 @@ func createMultipartForm(paramName, path string) (*multipart.Writer, *bytes.Buff
 		return nil, nil, err
 	}
 
-	return w, body, nil
+	return w, body, file.Close()
 }

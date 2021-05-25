@@ -128,7 +128,7 @@ INFO	2021/05/23 16:54:33 Sent: user id 295434263 | output outputs/295434263_1621
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// create fake log
-			err := os.WriteFile(logPath, []byte(tt.logData), 0666)
+			err := os.WriteFile(logPath, []byte(tt.logData), 0600)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -142,7 +142,9 @@ INFO	2021/05/23 16:54:33 Sent: user id 295434263 | output outputs/295434263_1621
 			}
 
 			// restore queue
-			restoreQueue(logPath, q)
+			if err = restoreQueue(logPath, q); err != nil {
+				t.Error(err)
+			}
 
 			// check
 			if !reflect.DeepEqual(expected, q) {

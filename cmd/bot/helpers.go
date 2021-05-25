@@ -75,11 +75,11 @@ func (app *application) getInputFromUser(
 	}
 }
 
-func (app *application) showMenuActivity(
+func (app *application) showMenuView(
 	chatID, messageID int64,
-	activity menu.Activity,
+	view menu.View,
 ) {
-	err := app.bot.EditMessageText(chatID, messageID, activity.Text, activity.Keyboard)
+	err := app.bot.EditMessageText(chatID, messageID, view.Text, view.Keyboard)
 	if err != nil {
 		if strings.Contains(err.Error(), "400") {
 			// 400 error: message is not modified
@@ -95,7 +95,7 @@ func (app *application) showMenuActivity(
 func match(path, pattern string, vars ...interface{}) bool {
 	regex := mustCompileCached(fmt.Sprintf("^%s$", pattern))
 	matches := regex.FindStringSubmatch(path)
-	if len(matches) <= 0 {
+	if len(matches) == 0 {
 		return false
 	}
 

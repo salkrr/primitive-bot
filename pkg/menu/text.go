@@ -2,6 +2,7 @@ package menu
 
 import "github.com/lazy-void/primitive-bot/pkg/primitive"
 
+// ShapeNames contains mapping of shapes to their string representation.
 var ShapeNames = map[primitive.Shape]string{
 	primitive.ShapeAny:              "Все",
 	primitive.ShapeTriangle:         "Треугольники",
@@ -24,6 +25,7 @@ const (
 	sizeMenuText   = "Выбери размер для большей стороны изображения (соотношение сторон будет сохранено):"
 )
 
+// Text used on the buttons.
 const (
 	createButtonText = "Начать"
 	backButtonText   = "Назад"

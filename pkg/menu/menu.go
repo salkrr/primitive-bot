@@ -1,3 +1,4 @@
+// Package menu implements functionality of a telegram menu.
 package menu
 
 import (
@@ -7,36 +8,40 @@ import (
 	"github.com/lazy-void/primitive-bot/pkg/tg"
 )
 
-type Activity struct {
+// View represents menu 'window' that is
+// made with the telegram's inline keyboard.
+type View struct {
 	Text     string
 	Keyboard tg.InlineKeyboardMarkup
 }
 
+// Menu represents menu made of View instances.
 type Menu struct {
-	RootActivity   Activity
-	ShapesActivity Activity
-	IterActivity   Activity
-	RepActivity    Activity
-	AlphaActivity  Activity
-	ExtActivity    Activity
-	SizeActivity   Activity
+	RootView   View
+	ShapesView View
+	IterView   View
+	RepView    View
+	AlphaView  View
+	ExtView    View
+	SizeView   View
 }
 
+// New initializes instance of Menu.
 func New(c primitive.Config) Menu {
-	shapesCallback := fmt.Sprintf("%s/%d", ShapesActivityCallback, c.Shape)
-	iterCallback := fmt.Sprintf("%s/%d", IterActivityCallback, c.Iterations)
-	repCallback := fmt.Sprintf("%s/%d", RepActivityCallback, c.Repeat)
-	alphaCallback := fmt.Sprintf("%s/%d", AlphaActivityCallback, c.Alpha)
-	extCallback := fmt.Sprintf("%s/%s", ExtActivityCallback, c.Extension)
-	sizeCallback := fmt.Sprintf("%s/%d", SizeActivityCallback, c.OutputSize)
+	shapesCallback := fmt.Sprintf("%s/%d", ShapesViewCallback, c.Shape)
+	iterCallback := fmt.Sprintf("%s/%d", IterViewCallback, c.Iterations)
+	repCallback := fmt.Sprintf("%s/%d", RepViewCallback, c.Repeat)
+	alphaCallback := fmt.Sprintf("%s/%d", AlphaViewCallback, c.Alpha)
+	extCallback := fmt.Sprintf("%s/%s", ExtViewCallback, c.Extension)
+	sizeCallback := fmt.Sprintf("%s/%d", SizeViewCallback, c.OutputSize)
 
 	return Menu{
-		RootActivity:   NewMenuActivity(RootActivityTmpl, ""),
-		ShapesActivity: NewMenuActivity(ShapesActivityTmpl, shapesCallback),
-		IterActivity:   NewMenuActivity(IterActivityTmpl, iterCallback),
-		RepActivity:    NewMenuActivity(RepActivityTmpl, repCallback),
-		AlphaActivity:  NewMenuActivity(AlphaActivityTmpl, alphaCallback),
-		ExtActivity:    NewMenuActivity(ExtActivityTmpl, extCallback),
-		SizeActivity:   NewMenuActivity(SizeActivityTmpl, sizeCallback),
+		RootView:   NewMenuView(RootViewTmpl, ""),
+		ShapesView: NewMenuView(ShapesViewTmpl, shapesCallback),
+		IterView:   NewMenuView(IterViewTmpl, iterCallback),
+		RepView:    NewMenuView(RepViewTmpl, repCallback),
+		AlphaView:  NewMenuView(AlphaViewTmpl, alphaCallback),
+		ExtView:    NewMenuView(ExtViewTmpl, extCallback),
+		SizeView:   NewMenuView(SizeViewTmpl, sizeCallback),
 	}
 }

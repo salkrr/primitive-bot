@@ -1,0 +1,51 @@
+run:
+  timeout: 5m
+
+output:
+  format: colored-line-number
+
+linters:
+  enable:
+    - errcheck
+    - errorlint
+    - godot
+    - goconst
+    - revive
+    - bodyclose
+    - megacheck
+    - govet
+    - unconvert
+    - megacheck
+    - structcheck
+    - gas
+    - gocyclo
+    - dupl
+    - misspell
+    - unparam
+    - varcheck
+    - deadcode
+    - typecheck
+    - ineffassign
+    - varcheck
+    - stylecheck
+    - exportloopref
+    - gocritic
+    - nakedret
+    - gosimple
+    - prealloc
+  disable-all: true
+  fast: false
+
+issues:
+  exclude-rules:
+    - text: Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*print(f|ln)?|os\.(Un)?Setenv). is not checked
+      linters:
+        - errcheck
+    - path: _test\.go
+      linters:
+        - gosec
+        - dupl
+    - text: 'G107: Potential HTTP request made with variable url'
+      linters:
+        - gosec
+  exclude-use-default: false

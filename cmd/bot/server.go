@@ -139,7 +139,7 @@ func (app *application) processPhoto(m tg.Message) {
 	}
 
 	// Create session
-	msg, err := app.bot.SendMessage(m.Chat.ID, menu.RootActivityTmpl.Text, menu.RootActivityTmpl.Keyboard)
+	msg, err := app.bot.SendMessage(m.Chat.ID, menu.RootViewTmpl.Text, menu.RootViewTmpl.Keyboard)
 	if err != nil {
 		app.serverError(m.Chat.ID, err)
 		return
@@ -165,11 +165,11 @@ func (app *application) downloadPhoto(photos []tg.PhotoSize) (string, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		img, err := app.bot.DownloadFile(file.FileID)
 		if err != nil {
-			return "", fmt.Errorf("couldn't download image: %s", err)
+			return "", fmt.Errorf("couldn't download image: %w", err)
 		}
 
-		if err := os.WriteFile(path, img, 0644); err != nil {
-			return "", fmt.Errorf("couldn't save image: %s", err)
+		if err := os.WriteFile(path, img, 0600); err != nil {
+			return "", fmt.Errorf("couldn't save image: %w", err)
 		}
 	}
 
@@ -177,7 +177,12 @@ func (app *application) downloadPhoto(photos []tg.PhotoSize) (string, error) {
 }
 
 func (app *application) processCallbackQuery(q tg.CallbackQuery) {
-	defer app.bot.AnswerCallbackQuery(q.ID, "")
+	defer func() {
+		err := app.bot.AnswerCallbackQuery(q.ID, "")
+		if err != nil {
+			app.errorLog.Printf("Error answering callback query: %s", err)
+		}
+	}()
 
 	s, ok := app.sessions.Get(q.From.ID)
 	if !ok || q.Message.MessageID != s.MenuMessageID {
@@ -191,36 +196,36 @@ func (app *application) processCallbackQuery(q tg.CallbackQuery) {
 	var num int
 	var slug string
 	switch {
-	case match(q.Data, menu.RootActivityCallback):
-		app.showRootMenuActivity(s)
+	case match(q.Data, menu.RootViewCallback):
+		app.showRootMenuView(s)
 	case match(q.Data, menu.CreateButtonCallback):
 		app.handleCreateButton(s)
-	case match(q.Data, menu.ShapesActivityCallback):
-		app.showShapesMenuActivity(s)
+	case match(q.Data, menu.ShapesViewCallback):
+		app.showShapesMenuView(s)
 	case match(q.Data, menu.ShapesButtonCallback, &num):
 		app.handleShapesButton(s, num)
-	case match(q.Data, menu.IterActivityCallback):
-		app.showIterMenuActivity(s)
+	case match(q.Data, menu.IterViewCallback):
+		app.showIterMenuView(s)
 	case match(q.Data, menu.IterButtonCallback, &num):
 		app.handleIterButton(s, num)
 	case match(q.Data, menu.IterInputCallback):
 		app.handleIterInput(s)
-	case match(q.Data, menu.RepActivityCallback):
-		app.showRepMenuActivity(s)
+	case match(q.Data, menu.RepViewCallback):
+		app.showRepMenuView(s)
 	case match(q.Data, menu.RepButtonCallback, &num):
 		app.handleRepButton(s, num)
-	case match(q.Data, menu.AlphaActivityCallback):
-		app.showAlphaMenuActivity(s)
+	case match(q.Data, menu.AlphaViewCallback):
+		app.showAlphaMenuView(s)
 	case match(q.Data, menu.AlphaButtonCallback, &num):
 		app.handleAlphaButton(s, num)
 	case match(q.Data, menu.AlphaInputCallback):
 		app.handleAlphaInput(s)
-	case match(q.Data, menu.ExtActivityCallback):
-		app.showExtMenuActivity(s)
+	case match(q.Data, menu.ExtViewCallback):
+		app.showExtMenuView(s)
 	case match(q.Data, menu.ExtButtonCallback, &slug):
 		app.handleExtButton(s, slug)
-	case match(q.Data, menu.SizeActivityCallback):
-		app.showSizeMenuActivity(s)
+	case match(q.Data, menu.SizeViewCallback):
+		app.showSizeMenuView(s)
 	case match(q.Data, menu.SizeButtonCallback, &num):
 		app.handleSizeButton(s, num)
 	case match(q.Data, menu.SizeInputCallback):

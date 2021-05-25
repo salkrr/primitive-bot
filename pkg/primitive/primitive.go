@@ -1,3 +1,5 @@
+// Package primitive implements types and methods for working
+// with fogleman/primitive package.
 package primitive
 
 import (
@@ -9,8 +11,10 @@ import (
 	"github.com/nfnt/resize"
 )
 
+// Shape implements enum of available shapes.
 type Shape int
 
+// Shapes that can be used to create images.
 const (
 	ShapeAny Shape = iota
 	ShapeTriangle
@@ -23,6 +27,7 @@ const (
 	ShapePolygon
 )
 
+// Config contains information needed to create primitive image.
 type Config struct {
 	workers    int
 	OutputSize int
@@ -30,9 +35,10 @@ type Config struct {
 	Iterations int
 	Repeat     int
 	Alpha      int
-	Extension  Extension
+	Extension  string
 }
 
+// NewConfig initializes instance of Config.
 func NewConfig() Config {
 	return Config{
 		workers:    runtime.NumCPU(),
@@ -41,19 +47,12 @@ func NewConfig() Config {
 		Iterations: 200,
 		Repeat:     1,
 		Alpha:      128,
-		Extension:  JPG,
+		Extension:  "jpg",
 	}
 }
 
-type Extension string
-
-const (
-	PNG = "png"
-	JPG = "jpg"
-	SVG = "svg"
-	GIF = "gif"
-)
-
+// Create method creates a primitive image from an image in inputPath
+// and saves result in outputPath.
 func (c Config) Create(inputPath, outputPath string) error {
 	// seed random number generator
 	rand.Seed(time.Now().UTC().UnixNano())
@@ -80,22 +79,22 @@ func (c Config) Create(inputPath, outputPath string) error {
 
 	// write output image
 	switch c.Extension {
-	case PNG:
+	case "png":
 		err = primitive.SavePNG(outputPath, model.Context.Image())
 		if err != nil {
 			return err
 		}
-	case JPG:
+	case "jpg":
 		err = primitive.SaveJPG(outputPath, model.Context.Image(), 95)
 		if err != nil {
 			return err
 		}
-	case SVG:
+	case "svg":
 		err = primitive.SaveFile(outputPath, model.SVG())
 		if err != nil {
 			return err
 		}
-	case GIF:
+	case "gif":
 		frames := model.Frames(0.001)
 		err = primitive.SaveGIFImageMagick(outputPath, frames, 50, 250)
 		if err != nil {

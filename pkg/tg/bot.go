@@ -15,10 +15,12 @@ const (
 	baseFileURL = "https://api.telegram.org/file/bot"
 )
 
+// Bot is an instance of a Telegram bot.
 type Bot struct {
 	Token string
 }
 
+// GetUpdates implements Telegram's getUpdates method.
 func (b *Bot) GetUpdates(offset int64) ([]Update, error) {
 	u, err := url.Parse(fmt.Sprintf("%s%s/getUpdates", baseBotURL, b.Token))
 	if err != nil {
@@ -58,6 +60,7 @@ func (b *Bot) GetUpdates(offset int64) ([]Update, error) {
 	return result, nil
 }
 
+// AnswerCallbackQuery implements Telegram's answerCallbackQuery method.
 func (b *Bot) AnswerCallbackQuery(callbackID, text string) error {
 	u, err := url.Parse(fmt.Sprintf("%s%s/answerCallbackQuery", baseBotURL, b.Token))
 	if err != nil {
@@ -77,6 +80,7 @@ func (b *Bot) AnswerCallbackQuery(callbackID, text string) error {
 	return nil
 }
 
+// EditMessageText implements Telegram's editMessageText method.
 func (b *Bot) EditMessageText(chatID, messageID int64, text string, keyboard ...InlineKeyboardMarkup) error {
 	u, err := url.Parse(fmt.Sprintf("%s%s/editMessageText", baseBotURL, b.Token))
 	if err != nil {
@@ -106,6 +110,7 @@ func (b *Bot) EditMessageText(chatID, messageID int64, text string, keyboard ...
 	return nil
 }
 
+// SendMessage implements Telegram's sendMessage method.
 func (b *Bot) SendMessage(chatID int64, message string, keyboard ...InlineKeyboardMarkup) (Message, error) {
 	params := map[string]interface{}{
 		"chat_id": chatID,
@@ -145,45 +150,7 @@ func (b *Bot) SendMessage(chatID int64, message string, keyboard ...InlineKeyboa
 	return result, nil
 }
 
-func (b *Bot) SendPhoto(chatID int64, photoPath string) error {
-	w, formBody, err := createMultipartForm("photo", photoPath)
-	if err != nil {
-		return err
-	}
-
-	u, err := url.Parse(fmt.Sprintf("%s%s/sendPhoto", baseBotURL, b.Token))
-	if err != nil {
-		return err
-	}
-
-	q := url.Values{}
-	q.Set("chat_id", fmt.Sprint(chatID))
-	u.RawQuery = q.Encode()
-
-	resp, err := http.Post(u.String(), w.FormDataContentType(), formBody)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	var respContent Response
-	err = json.Unmarshal(body, &respContent)
-	if err != nil {
-		return err
-	}
-
-	if !respContent.Ok {
-		return fmt.Errorf("error code: %v; description: %s", respContent.ErrorCode, respContent.Description)
-	}
-
-	return nil
-}
-
+// SendDocument implements0 Telegram's sendDocument method.
 func (b *Bot) SendDocument(chatID int64, documentPath string) error {
 	w, formBody, err := createMultipartForm("document", documentPath)
 	if err != nil {
@@ -223,6 +190,7 @@ func (b *Bot) SendDocument(chatID int64, documentPath string) error {
 	return nil
 }
 
+// DeleteMessage implements Telegram's deleteMessage method.
 func (b *Bot) DeleteMessage(chatID, messageID int64) error {
 	u, err := url.Parse(fmt.Sprintf("%s%s/deleteMessage", baseBotURL, b.Token))
 	if err != nil {
@@ -242,6 +210,7 @@ func (b *Bot) DeleteMessage(chatID, messageID int64) error {
 	return nil
 }
 
+// GetFile implements Telegram's getFile method.
 func (b *Bot) GetFile(fileID string) (File, error) {
 	u, err := url.Parse(fmt.Sprintf("%s%s/getFile", baseBotURL, b.Token))
 	if err != nil {
@@ -271,6 +240,7 @@ func (b *Bot) GetFile(fileID string) (File, error) {
 	return result, nil
 }
 
+// DownloadFile downloads file from the Telegram server.
 func (b *Bot) DownloadFile(fileID string) ([]byte, error) {
 	file, err := b.GetFile(fileID)
 	if err != nil {

@@ -2,28 +2,29 @@ package menu
 
 import "fmt"
 
+// Callbacks that are sent by menu buttons.
 var (
-	RootActivityCallback = "/"
+	RootViewCallback     = "/"
 	CreateButtonCallback = "/create"
 
-	ShapesActivityCallback = "/shape"
-	ShapesButtonCallback   = fmt.Sprintf("%s/([0-8])", ShapesActivityCallback)
+	ShapesViewCallback   = "/shape"
+	ShapesButtonCallback = fmt.Sprintf("%s/([0-8])", ShapesViewCallback)
 
-	IterActivityCallback = "/iter"
-	IterButtonCallback   = fmt.Sprintf("%s/([0-9]+)", IterActivityCallback)
-	IterInputCallback    = "/iter/input"
+	IterViewCallback   = "/iter"
+	IterButtonCallback = fmt.Sprintf("%s/([0-9]+)", IterViewCallback)
+	IterInputCallback  = "/iter/input"
 
-	RepActivityCallback = "/rep"
-	RepButtonCallback   = fmt.Sprintf("%s/([1-6])", RepActivityCallback)
+	RepViewCallback   = "/rep"
+	RepButtonCallback = fmt.Sprintf("%s/([1-6])", RepViewCallback)
 
-	AlphaActivityCallback = "/alpha"
-	AlphaButtonCallback   = fmt.Sprintf("%s/([0-9]+)", AlphaActivityCallback)
-	AlphaInputCallback    = "/alpha/input"
+	AlphaViewCallback   = "/alpha"
+	AlphaButtonCallback = fmt.Sprintf("%s/([0-9]+)", AlphaViewCallback)
+	AlphaInputCallback  = "/alpha/input"
 
-	ExtActivityCallback = "/ext"
-	ExtButtonCallback   = fmt.Sprintf("%s/(jpg|png|svg|gif)", ExtActivityCallback)
+	ExtViewCallback   = "/ext"
+	ExtButtonCallback = fmt.Sprintf("%s/(jpg|png|svg|gif)", ExtViewCallback)
 
-	SizeActivityCallback = "/size"
-	SizeButtonCallback   = fmt.Sprintf("%s/([0-9]+)", SizeActivityCallback)
-	SizeInputCallback    = "/size/input"
+	SizeViewCallback   = "/size"
+	SizeButtonCallback = fmt.Sprintf("%s/([0-9]+)", SizeViewCallback)
+	SizeInputCallback  = "/size/input"
 )

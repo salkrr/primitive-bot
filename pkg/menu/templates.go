@@ -14,16 +14,16 @@ var (
 				{Text: createButtonText, CallbackData: CreateButtonCallback},
 			},
 			{
-				{Text: shapesButtonText, CallbackData: ShapesActivityCallback},
-				{Text: iterButtonText, CallbackData: IterActivityCallback},
+				{Text: shapesButtonText, CallbackData: ShapesViewCallback},
+				{Text: iterButtonText, CallbackData: IterViewCallback},
 			},
 			{
-				{Text: repButtonText, CallbackData: RepActivityCallback},
-				{Text: alphaButtonText, CallbackData: AlphaActivityCallback},
+				{Text: repButtonText, CallbackData: RepViewCallback},
+				{Text: alphaButtonText, CallbackData: AlphaViewCallback},
 			},
 			{
-				{Text: extButtonText, CallbackData: ExtActivityCallback},
-				{Text: sizeButtonText, CallbackData: SizeActivityCallback},
+				{Text: extButtonText, CallbackData: ExtViewCallback},
+				{Text: sizeButtonText, CallbackData: SizeViewCallback},
 			},
 		},
 	}
@@ -33,61 +33,61 @@ var (
 			{
 				{
 					Text:         ShapeNames[primitive.ShapeAny],
-					CallbackData: fmt.Sprintf("%s/0", ShapesActivityCallback),
+					CallbackData: fmt.Sprintf("%s/0", ShapesViewCallback),
 				},
 			},
 			{
 				{
 					Text:         ShapeNames[primitive.ShapeTriangle],
-					CallbackData: fmt.Sprintf("%s/1", ShapesActivityCallback),
+					CallbackData: fmt.Sprintf("%s/1", ShapesViewCallback),
 				},
 			},
 			{
 				{
 					Text:         ShapeNames[primitive.ShapeRectangle],
-					CallbackData: fmt.Sprintf("%s/2", ShapesActivityCallback),
+					CallbackData: fmt.Sprintf("%s/2", ShapesViewCallback),
 				},
 			},
 			{
 				{
 					Text:         ShapeNames[primitive.ShapeEllipse],
-					CallbackData: fmt.Sprintf("%s/3", ShapesActivityCallback),
+					CallbackData: fmt.Sprintf("%s/3", ShapesViewCallback),
 				},
 			},
 			{
 				{
 					Text:         ShapeNames[primitive.ShapeCircle],
-					CallbackData: fmt.Sprintf("%s/4", ShapesActivityCallback),
+					CallbackData: fmt.Sprintf("%s/4", ShapesViewCallback),
 				},
 			},
 			{
 				{
 					Text:         ShapeNames[primitive.ShapeRotatedRectangle],
-					CallbackData: fmt.Sprintf("%s/5", ShapesActivityCallback),
+					CallbackData: fmt.Sprintf("%s/5", ShapesViewCallback),
 				},
 			},
 			{
 				{
 					Text:         ShapeNames[primitive.ShapeBezier],
-					CallbackData: fmt.Sprintf("%s/6", ShapesActivityCallback),
+					CallbackData: fmt.Sprintf("%s/6", ShapesViewCallback),
 				},
 			},
 			{
 				{
 					Text:         ShapeNames[primitive.ShapeRotatedEllipse],
-					CallbackData: fmt.Sprintf("%s/7", ShapesActivityCallback),
+					CallbackData: fmt.Sprintf("%s/7", ShapesViewCallback),
 				},
 			},
 			{
 				{
 					Text:         ShapeNames[primitive.ShapePolygon],
-					CallbackData: fmt.Sprintf("%s/8", ShapesActivityCallback),
+					CallbackData: fmt.Sprintf("%s/8", ShapesViewCallback),
 				},
 			},
 			{
 				{
 					Text:         backButtonText,
-					CallbackData: RootActivityCallback,
+					CallbackData: RootViewCallback,
 				},
 			},
 		},
@@ -96,20 +96,20 @@ var (
 	iterKeyboardTmpl = tg.InlineKeyboardMarkup{
 		InlineKeyboard: [][]tg.InlineKeyboardButton{
 			{
-				{Text: "100", CallbackData: fmt.Sprintf("%s/100", IterActivityCallback)},
-				{Text: "200", CallbackData: fmt.Sprintf("%s/200", IterActivityCallback)},
-				{Text: "400", CallbackData: fmt.Sprintf("%s/400", IterActivityCallback)},
+				{Text: "100", CallbackData: fmt.Sprintf("%s/100", IterViewCallback)},
+				{Text: "200", CallbackData: fmt.Sprintf("%s/200", IterViewCallback)},
+				{Text: "400", CallbackData: fmt.Sprintf("%s/400", IterViewCallback)},
 			},
 			{
-				{Text: "800", CallbackData: fmt.Sprintf("%s/800", IterActivityCallback)},
-				{Text: "1000", CallbackData: fmt.Sprintf("%s/1000", IterActivityCallback)},
-				{Text: "2000", CallbackData: fmt.Sprintf("%s/2000", IterActivityCallback)},
+				{Text: "800", CallbackData: fmt.Sprintf("%s/800", IterViewCallback)},
+				{Text: "1000", CallbackData: fmt.Sprintf("%s/1000", IterViewCallback)},
+				{Text: "2000", CallbackData: fmt.Sprintf("%s/2000", IterViewCallback)},
 			},
 			{
 				{Text: OtherButtonText, CallbackData: IterInputCallback},
 			},
 			{
-				{Text: backButtonText, CallbackData: RootActivityCallback},
+				{Text: backButtonText, CallbackData: RootViewCallback},
 			},
 		},
 	}
@@ -117,17 +117,17 @@ var (
 	repKeyboardTmpl = tg.InlineKeyboardMarkup{
 		InlineKeyboard: [][]tg.InlineKeyboardButton{
 			{
-				{Text: "1", CallbackData: fmt.Sprintf("%s/1", RepActivityCallback)},
-				{Text: "2", CallbackData: fmt.Sprintf("%s/2", RepActivityCallback)},
-				{Text: "3", CallbackData: fmt.Sprintf("%s/3", RepActivityCallback)},
+				{Text: "1", CallbackData: fmt.Sprintf("%s/1", RepViewCallback)},
+				{Text: "2", CallbackData: fmt.Sprintf("%s/2", RepViewCallback)},
+				{Text: "3", CallbackData: fmt.Sprintf("%s/3", RepViewCallback)},
 			},
 			{
-				{Text: "4", CallbackData: fmt.Sprintf("%s/4", RepActivityCallback)},
-				{Text: "5", CallbackData: fmt.Sprintf("%s/5", RepActivityCallback)},
-				{Text: "6", CallbackData: fmt.Sprintf("%s/6", RepActivityCallback)},
+				{Text: "4", CallbackData: fmt.Sprintf("%s/4", RepViewCallback)},
+				{Text: "5", CallbackData: fmt.Sprintf("%s/5", RepViewCallback)},
+				{Text: "6", CallbackData: fmt.Sprintf("%s/6", RepViewCallback)},
 			},
 			{
-				{Text: backButtonText, CallbackData: RootActivityCallback},
+				{Text: backButtonText, CallbackData: RootViewCallback},
 			},
 		},
 	}
@@ -135,19 +135,19 @@ var (
 	alphaKeyboardTmpl = tg.InlineKeyboardMarkup{
 		InlineKeyboard: [][]tg.InlineKeyboardButton{
 			{
-				{Text: autoButtonText, CallbackData: fmt.Sprintf("%s/0", AlphaActivityCallback)},
+				{Text: autoButtonText, CallbackData: fmt.Sprintf("%s/0", AlphaViewCallback)},
 			},
 			{
-				{Text: "32", CallbackData: fmt.Sprintf("%s/32", AlphaActivityCallback)},
-				{Text: "64", CallbackData: fmt.Sprintf("%s/64", AlphaActivityCallback)},
-				{Text: "128", CallbackData: fmt.Sprintf("%s/128", AlphaActivityCallback)},
-				{Text: "255", CallbackData: fmt.Sprintf("%s/255", AlphaActivityCallback)},
+				{Text: "32", CallbackData: fmt.Sprintf("%s/32", AlphaViewCallback)},
+				{Text: "64", CallbackData: fmt.Sprintf("%s/64", AlphaViewCallback)},
+				{Text: "128", CallbackData: fmt.Sprintf("%s/128", AlphaViewCallback)},
+				{Text: "255", CallbackData: fmt.Sprintf("%s/255", AlphaViewCallback)},
 			},
 			{
 				{Text: OtherButtonText, CallbackData: AlphaInputCallback},
 			},
 			{
-				{Text: backButtonText, CallbackData: RootActivityCallback},
+				{Text: backButtonText, CallbackData: RootViewCallback},
 			},
 		},
 	}
@@ -155,14 +155,14 @@ var (
 	extKeyboardTmpl = tg.InlineKeyboardMarkup{
 		InlineKeyboard: [][]tg.InlineKeyboardButton{
 			{
-				{Text: "jpg", CallbackData: fmt.Sprintf("%s/jpg", ExtActivityCallback)},
-				{Text: "png", CallbackData: fmt.Sprintf("%s/png", ExtActivityCallback)},
-				{Text: "svg", CallbackData: fmt.Sprintf("%s/svg", ExtActivityCallback)},
+				{Text: "jpg", CallbackData: fmt.Sprintf("%s/jpg", ExtViewCallback)},
+				{Text: "png", CallbackData: fmt.Sprintf("%s/png", ExtViewCallback)},
+				{Text: "svg", CallbackData: fmt.Sprintf("%s/svg", ExtViewCallback)},
 				// gifs are disabled due to performance issues
 				// {Text: "gif", CallbackData: fmt.Sprintf("%s/gif", extButtonCallback)},
 			},
 			{
-				{Text: backButtonText, CallbackData: RootActivityCallback},
+				{Text: backButtonText, CallbackData: RootViewCallback},
 			},
 		},
 	}
@@ -170,69 +170,70 @@ var (
 	sizeKeyboardTmpl = tg.InlineKeyboardMarkup{
 		InlineKeyboard: [][]tg.InlineKeyboardButton{
 			{
-				{Text: "256", CallbackData: fmt.Sprintf("%s/256", SizeActivityCallback)},
-				{Text: "512", CallbackData: fmt.Sprintf("%s/512", SizeActivityCallback)},
-				{Text: "720", CallbackData: fmt.Sprintf("%s/720", SizeActivityCallback)},
+				{Text: "256", CallbackData: fmt.Sprintf("%s/256", SizeViewCallback)},
+				{Text: "512", CallbackData: fmt.Sprintf("%s/512", SizeViewCallback)},
+				{Text: "720", CallbackData: fmt.Sprintf("%s/720", SizeViewCallback)},
 			},
 			{
-				{Text: "1024", CallbackData: fmt.Sprintf("%s/1024", SizeActivityCallback)},
-				{Text: "1280", CallbackData: fmt.Sprintf("%s/1280", SizeActivityCallback)},
-				{Text: "1920", CallbackData: fmt.Sprintf("%s/1920", SizeActivityCallback)},
+				{Text: "1024", CallbackData: fmt.Sprintf("%s/1024", SizeViewCallback)},
+				{Text: "1280", CallbackData: fmt.Sprintf("%s/1280", SizeViewCallback)},
+				{Text: "1920", CallbackData: fmt.Sprintf("%s/1920", SizeViewCallback)},
 			},
 			{
 				{Text: OtherButtonText, CallbackData: SizeInputCallback},
 			},
 			{
-				{Text: backButtonText, CallbackData: RootActivityCallback},
+				{Text: backButtonText, CallbackData: RootViewCallback},
 			},
 		},
 	}
 )
 
+// Templates for the different menu views.
 var (
-	RootActivityTmpl = Activity{
+	RootViewTmpl = View{
 		Text:     rootMenuText,
 		Keyboard: rootKeyboardTmpl,
 	}
 
-	ShapesActivityTmpl = Activity{
+	ShapesViewTmpl = View{
 		Text:     shapesMenuText,
 		Keyboard: shapesKeyboardTmpl,
 	}
 
-	IterActivityTmpl = Activity{
+	IterViewTmpl = View{
 		Text:     iterMenuText,
 		Keyboard: iterKeyboardTmpl,
 	}
 
-	RepActivityTmpl = Activity{
+	RepViewTmpl = View{
 		Text:     repMenuText,
 		Keyboard: repKeyboardTmpl,
 	}
 
-	AlphaActivityTmpl = Activity{
+	AlphaViewTmpl = View{
 		Text:     alphaMenuText,
 		Keyboard: alphaKeyboardTmpl,
 	}
 
-	ExtActivityTmpl = Activity{
+	ExtViewTmpl = View{
 		Text:     extMenuText,
 		Keyboard: extKeyboardTmpl,
 	}
 
-	SizeActivityTmpl = Activity{
+	SizeViewTmpl = View{
 		Text:     sizeMenuText,
 		Keyboard: sizeKeyboardTmpl,
 	}
 )
 
-// NewMenuActivity creates new Activity from the template
-// adding symbol to the option that is chosen at the moment
-func NewMenuActivity(
-	template Activity,
+// NewMenuView creates new View from the template
+// adding symbol to the option that is chosen at the moment.
+func NewMenuView(
+	template View,
 	selectedCallback string,
 	newButtonText ...string,
-) Activity {
+) View {
 	checkSymbol := "👉"
 
 	// Create new Keyboard
@@ -254,7 +255,7 @@ func NewMenuActivity(
 		}
 	}
 
-	return Activity{
+	return View{
 		Text:     template.Text,
 		Keyboard: newKeyboard,
 	}
