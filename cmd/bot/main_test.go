@@ -41,6 +41,7 @@ INFO	2021/05/23 16:00:49 Callback Query: data '/create' from the user 'Kir' with
 INFO	2021/05/23 16:00:49 Enqueued: user id 295434263 | input inputs/AQADntiNoi4AAwSIAgAB.jpg | iterations=200, shape=0, alpha=128, repeat=1, resolution=1280, extension=jpg
 INFO	2021/05/23 16:00:49 Creating: user id 295434263 | input inputs/AQADntiNoi4AAwSIAgAB.jpg | output outputs/295434263_1621774849.jpg | iterations=200, shape=0, alpha=128, repeat=1, resolution=1280, extension=jpg
 INFO	2021/05/23 16:00:52 Finished: user id 295434263 | input inputs/AQADntiNoi4AAwSIAgAB.jpg | output outputs/295434263_1621774849.jpg | 3.1 seconds
+INFO	2021/05/23 16:00:55 Sent: user id 295434263 | output outputs/295434263_1621774849.jpg
 `,
 			operations: []queue.Operation{},
 		},
@@ -57,6 +58,7 @@ INFO	2021/05/23 16:45:24 Enqueued: user id 295434263 | input inputs/AQADntiNoi4A
 INFO	2021/05/23 16:45:25 Callback Query: data '/create' from the user 'Kir' with the ID '2954342632
 INFO	2021/05/23 16:45:25 Enqueued: user id 295434263 | input inputs/AQADntiNoi4AAwSIAgAB.jpg | iterations=30, shape=1, alpha=128, repeat=1, resolution=1280, extension=jpg
 INFO	2021/05/23 16:49:12 Finished: user id 295434263 | input inputs/AQADntiNoi4AAwSIAgAB.jpg | output outputs/295434263_1621774849.jpg | 5.1 seconds
+INFO	2021/05/23 16:49:20 Sent: user id 295434263 | output outputs/295434263_1621774849.jpg
 `,
 			operations: []queue.Operation{
 				{

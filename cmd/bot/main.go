@@ -135,7 +135,7 @@ func restoreQueue(logPath string, q *queue.Queue) (err error) {
 			continue
 		}
 
-		if strings.HasPrefix(msg, "Finished:") {
+		if strings.HasPrefix(msg, "Sent:") {
 			q.Dequeue()
 		}
 	}
