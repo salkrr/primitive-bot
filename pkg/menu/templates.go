@@ -8,6 +8,27 @@ import (
 )
 
 var (
+	rootKeyboardTmpl   tg.InlineKeyboardMarkup
+	shapesKeyboardTmpl tg.InlineKeyboardMarkup
+	iterKeyboardTmpl   tg.InlineKeyboardMarkup
+	repKeyboardTmpl    tg.InlineKeyboardMarkup
+	alphaKeyboardTmpl  tg.InlineKeyboardMarkup
+	extKeyboardTmpl    tg.InlineKeyboardMarkup
+	sizeKeyboardTmpl   tg.InlineKeyboardMarkup
+)
+
+// Templates for the different menu views.
+var (
+	RootViewTmpl   View
+	ShapesViewTmpl View
+	IterViewTmpl   View
+	RepViewTmpl    View
+	AlphaViewTmpl  View
+	ExtViewTmpl    View
+	SizeViewTmpl   View
+)
+
+func initKeyboardTemplates() {
 	rootKeyboardTmpl = tg.InlineKeyboardMarkup{
 		InlineKeyboard: [][]tg.InlineKeyboardButton{
 			{
@@ -44,20 +65,14 @@ var (
 			},
 			{
 				{
+					Text:         ShapeNames[primitive.ShapePolygon],
+					CallbackData: fmt.Sprintf("%s/8", ShapesViewCallback),
+				},
+			},
+			{
+				{
 					Text:         ShapeNames[primitive.ShapeRectangle],
 					CallbackData: fmt.Sprintf("%s/2", ShapesViewCallback),
-				},
-			},
-			{
-				{
-					Text:         ShapeNames[primitive.ShapeEllipse],
-					CallbackData: fmt.Sprintf("%s/3", ShapesViewCallback),
-				},
-			},
-			{
-				{
-					Text:         ShapeNames[primitive.ShapeCircle],
-					CallbackData: fmt.Sprintf("%s/4", ShapesViewCallback),
 				},
 			},
 			{
@@ -68,8 +83,8 @@ var (
 			},
 			{
 				{
-					Text:         ShapeNames[primitive.ShapeBezier],
-					CallbackData: fmt.Sprintf("%s/6", ShapesViewCallback),
+					Text:         ShapeNames[primitive.ShapeEllipse],
+					CallbackData: fmt.Sprintf("%s/3", ShapesViewCallback),
 				},
 			},
 			{
@@ -80,8 +95,14 @@ var (
 			},
 			{
 				{
-					Text:         ShapeNames[primitive.ShapePolygon],
-					CallbackData: fmt.Sprintf("%s/8", ShapesViewCallback),
+					Text:         ShapeNames[primitive.ShapeCircle],
+					CallbackData: fmt.Sprintf("%s/4", ShapesViewCallback),
+				},
+			},
+			{
+				{
+					Text:         ShapeNames[primitive.ShapeBezier],
+					CallbackData: fmt.Sprintf("%s/6", ShapesViewCallback),
 				},
 			},
 			{
@@ -187,10 +208,9 @@ var (
 			},
 		},
 	}
-)
+}
 
-// Templates for the different menu views.
-var (
+func initViewTemplates() {
 	RootViewTmpl = View{
 		Text:     rootMenuText,
 		Keyboard: rootKeyboardTmpl,
@@ -225,7 +245,7 @@ var (
 		Text:     sizeMenuText,
 		Keyboard: sizeKeyboardTmpl,
 	}
-)
+}
 
 // NewMenuView creates new View from the template
 // adding symbol to the option that is chosen at the moment.

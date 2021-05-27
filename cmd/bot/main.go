@@ -1,7 +1,10 @@
 package main
 
+//go:generate gotext update -out=catalog.go -lang=en,ru
+
 import (
 	"bufio"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -9,6 +12,12 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/lazy-void/primitive-bot/pkg/menu"
+
+	"golang.org/x/text/language"
+
+	"golang.org/x/text/message"
 
 	"github.com/lazy-void/primitive-bot/pkg/primitive"
 
@@ -20,6 +29,7 @@ import (
 type application struct {
 	infoLog         *log.Logger
 	errorLog        *log.Logger
+	printer         *message.Printer
 	inDir           string
 	outDir          string
 	operationsLimit int
@@ -34,6 +44,21 @@ func main() {
 	outDir := flag.String("o", "outputs", "Name of the directory where outputs will be stored.")
 	logPath := flag.String("log", "", "Path to the previous log file. It is used to restore queue.")
 	operationsLimit := flag.Int("limit", 5, "The number of operations that the user can add to the queue.")
+
+	var lang language.Tag
+	flag.Func("lang", "Language of the bot (en, ru).", func(s string) error {
+		if s == "" {
+			lang = language.English
+			return nil
+		}
+
+		if s != "en" && s != "ru" {
+			return errors.New("incorrect language")
+		}
+
+		lang = language.MustParse(s)
+		return nil
+	})
 	flag.Parse()
 
 	if *token == "" {
@@ -44,7 +69,7 @@ func main() {
 	if *logPath != "" {
 		err := restoreQueue(*logPath, q)
 		if err != nil {
-			log.Fatalf("Error restoring queue from the log: %s", err)
+			log.Fatalf("Error restoring queue from the log: %v", err)
 		}
 	}
 
@@ -58,9 +83,14 @@ func main() {
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 
+	// initialize localization
+	printer := message.NewPrinter(lang)
+	menu.InitText(*printer)
+
 	app := application{
 		infoLog:         infoLog,
 		errorLog:        errorLog,
+		printer:         printer,
 		inDir:           *inDir,
 		outDir:          *outDir,
 		operationsLimit: *operationsLimit,

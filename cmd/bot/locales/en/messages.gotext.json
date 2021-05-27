@@ -1,0 +1,264 @@
+{
+    "language": "en",
+    "messages": [
+        {
+            "id": "You can't add more operations to the queue.",
+            "message": "You can't add more operations to the queue.",
+            "translation": "You can't add more operations to the queue."
+        },
+        {
+            "id": "Something gone wrong! Please, try again in a few minutes.",
+            "message": "Something gone wrong! Please, try again in a few minutes.",
+            "translation": "Something gone wrong! Please, try again in a few minutes."
+        },
+        {
+            "id": "{Position} place in the queue.\n\nShapes: {Shape}\nSteps: {Iterations}\nRepetitions: {Repeat}\nAlpha-channel: {Alpha}\nExtension: {Extension}\nSize: {OutputSize}",
+            "message": "{Position} place in the queue.\n\nShapes: {Shape}\nSteps: {Iterations}\nRepetitions: {Repeat}\nAlpha-channel: {Alpha}\nExtension: {Extension}\nSize: {OutputSize}",
+            "translation": "{Position} place in the queue.\n\nShapes: {Shape}\nSteps: {Iterations}\nRepetitions: {Repeat}\nAlpha-channel: {Alpha}\nExtension: {Extension}\nSize: {OutputSize}",
+            "placeholders": [
+                {
+                    "id": "Position",
+                    "string": "%[1]d",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 1,
+                    "expr": "position"
+                },
+                {
+                    "id": "Shape",
+                    "string": "%[2]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 2,
+                    "expr": "strings.ToLower(menu.ShapeNames[c.Shape])"
+                },
+                {
+                    "id": "Iterations",
+                    "string": "%[3]d",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 3,
+                    "expr": "c.Iterations"
+                },
+                {
+                    "id": "Repeat",
+                    "string": "%[4]d",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 4,
+                    "expr": "c.Repeat"
+                },
+                {
+                    "id": "Alpha",
+                    "string": "%[5]d",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 5,
+                    "expr": "c.Alpha"
+                },
+                {
+                    "id": "Extension",
+                    "string": "%[6]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 6,
+                    "expr": "c.Extension"
+                },
+                {
+                    "id": "OutputSize",
+                    "string": "%#[7]v",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 7,
+                    "expr": "c.OutputSize"
+                }
+            ]
+        },
+        {
+            "id": "Enter number between {Min} and {Max}:",
+            "message": "Enter number between {Min} and {Max}:",
+            "translation": "Enter number between {Min} and {Max}:",
+            "placeholders": [
+                {
+                    "id": "Min",
+                    "string": "%[1]d",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 1,
+                    "expr": "min"
+                },
+                {
+                    "id": "Max",
+                    "string": "%[2]d",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 2,
+                    "expr": "max"
+                }
+            ]
+        },
+        {
+            "id": "Incorrect value!\nEnter number between {Min} and {Max}:",
+            "message": "Incorrect value!\nEnter number between {Min} and {Max}:",
+            "translation": "Incorrect value!\nEnter number between {Min} and {Max}:",
+            "placeholders": [
+                {
+                    "id": "Min",
+                    "string": "%[1]d",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 1,
+                    "expr": "min"
+                },
+                {
+                    "id": "Max",
+                    "string": "%[2]d",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 2,
+                    "expr": "max"
+                }
+            ]
+        },
+        {
+            "id": "There aren't any operations in the queue.",
+            "message": "There aren't any operations in the queue.",
+            "translation": "There aren't any operations in the queue."
+        },
+        {
+            "id": "Send me some image.",
+            "message": "Send me some image.",
+            "translation": "Send me some image."
+        },
+        {
+            "id": "All",
+            "message": "All",
+            "translation": "All"
+        },
+        {
+            "id": "Triangles",
+            "message": "Triangles",
+            "translation": "Triangles"
+        },
+        {
+            "id": "Rectangles",
+            "message": "Rectangles",
+            "translation": "Rectangles"
+        },
+        {
+            "id": "Rotated Rectangles",
+            "message": "Rotated Rectangles",
+            "translation": "Rotated Rectangles"
+        },
+        {
+            "id": "Circles",
+            "message": "Circles",
+            "translation": "Circles"
+        },
+        {
+            "id": "Ellipses",
+            "message": "Ellipses",
+            "translation": "Ellipses"
+        },
+        {
+            "id": "Rotated Ellipses",
+            "message": "Rotated Ellipses",
+            "translation": "Rotated Ellipses"
+        },
+        {
+            "id": "Quadrilaterals",
+            "message": "Quadrilaterals",
+            "translation": "Quadrilaterals"
+        },
+        {
+            "id": "Bezier Curves",
+            "message": "Bezier Curves",
+            "translation": "Bezier Curves"
+        },
+        {
+            "id": "Create",
+            "message": "Create",
+            "translation": "Create"
+        },
+        {
+            "id": "Back",
+            "message": "Back",
+            "translation": "Back"
+        },
+        {
+            "id": "Shapes",
+            "message": "Shapes",
+            "translation": "Shapes"
+        },
+        {
+            "id": "Steps",
+            "message": "Steps",
+            "translation": "Steps"
+        },
+        {
+            "id": "Repetitions",
+            "message": "Repetitions",
+            "translation": "Repetitions"
+        },
+        {
+            "id": "Alpha",
+            "message": "Alpha",
+            "translation": "Alpha"
+        },
+        {
+            "id": "Extension",
+            "message": "Extension",
+            "translation": "Extension"
+        },
+        {
+            "id": "Size",
+            "message": "Size",
+            "translation": "Size"
+        },
+        {
+            "id": "Auto",
+            "message": "Auto",
+            "translation": "Auto"
+        },
+        {
+            "id": "Other",
+            "message": "Other",
+            "translation": "Other"
+        },
+        {
+            "id": "Menu:",
+            "message": "Menu:",
+            "translation": "Menu:"
+        },
+        {
+            "id": "Select the shapes to be used to create the image:",
+            "message": "Select the shapes to be used to create the image:",
+            "translation": "Select the shapes to be used to create the image:"
+        },
+        {
+            "id": "Select the number of steps. Shapes will be drawn at each step:",
+            "message": "Select the number of steps. Shapes will be drawn at each step:",
+            "translation": "Select the number of steps. Shapes will be drawn at each step:"
+        },
+        {
+            "id": "Select the number of shapes to draw in each step:",
+            "message": "Select the number of shapes to draw in each step:",
+            "translation": "Select the number of shapes to draw in each step:"
+        },
+        {
+            "id": "Select an alpha-channel value for the shapes:",
+            "message": "Select an alpha-channel value for the shapes:",
+            "translation": "Select an alpha-channel value for the shapes:"
+        },
+        {
+            "id": "Select an extension of the resulting image:",
+            "message": "Select an extension of the resulting image:",
+            "translation": "Select an extension of the resulting image:"
+        },
+        {
+            "id": "Select a size for the larger side of the resulting image (the aspect ratio will be preserved):",
+            "message": "Select a size for the larger side of the resulting image (the aspect ratio will be preserved):",
+            "translation": "Select a size for the larger side of the resulting image (the aspect ratio will be preserved):"
+        }
+    ]
+}

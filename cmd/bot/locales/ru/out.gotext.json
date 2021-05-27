@@ -1,0 +1,259 @@
+{
+    "language": "ru",
+    "messages": [
+        {
+            "id": "You can't add more operations to the queue.",
+            "message": "You can't add more operations to the queue.",
+            "translation": "Ты не можешь добавить больше операций в очередь."
+        },
+        {
+            "id": "Something gone wrong! Please, try again in a few minutes.",
+            "message": "Something gone wrong! Please, try again in a few minutes.",
+            "translation": "Что-то пошло не так! Попробуй снова через пару минут."
+        },
+        {
+            "id": "{Position} place in the queue.\n\nShapes: {Shape}\nSteps: {Iterations}\nRepetitions: {Repeat}\nAlpha-channel: {Alpha}\nExtension: {Extension}\nSize: {OutputSize}",
+            "message": "{Position} place in the queue.\n\nShapes: {Shape}\nSteps: {Iterations}\nRepetitions: {Repeat}\nAlpha-channel: {Alpha}\nExtension: {Extension}\nSize: {OutputSize}",
+            "translation": "{Position} место в очереди.\n\nФигуры: {Shape}\nШаги: {Iterations}\nПовторения: {Repeat}\nАльфа-канал: {Alpha}\nРасширение: {Extension}\nРазмеры: {OutputSize}",
+            "placeholders": [
+                {
+                    "id": "Position",
+                    "string": "%[1]d",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 1,
+                    "expr": "position"
+                },
+                {
+                    "id": "Shape",
+                    "string": "%[2]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 2,
+                    "expr": "strings.ToLower(menu.ShapeNames[c.Shape])"
+                },
+                {
+                    "id": "Iterations",
+                    "string": "%[3]d",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 3,
+                    "expr": "c.Iterations"
+                },
+                {
+                    "id": "Repeat",
+                    "string": "%[4]d",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 4,
+                    "expr": "c.Repeat"
+                },
+                {
+                    "id": "Alpha",
+                    "string": "%[5]d",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 5,
+                    "expr": "c.Alpha"
+                },
+                {
+                    "id": "Extension",
+                    "string": "%[6]s",
+                    "type": "string",
+                    "underlyingType": "string",
+                    "argNum": 6,
+                    "expr": "c.Extension"
+                },
+                {
+                    "id": "OutputSize",
+                    "string": "%#[7]v",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 7,
+                    "expr": "c.OutputSize"
+                }
+            ]
+        },
+        {
+            "id": "Enter number between {Min} and {Max}:",
+            "message": "Enter number between {Min} and {Max}:",
+            "translation": "Введи число от {Min} до {Max}:",
+            "placeholders": [
+                {
+                    "id": "Min",
+                    "string": "%#[1]v",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 1,
+                    "expr": "min"
+                },
+                {
+                    "id": "Max",
+                    "string": "%#[2]v",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 2,
+                    "expr": "max"
+                }
+            ]
+        },
+        {
+            "id": "Incorrect value!\nEnter number between {Min} and {Max}:",
+            "message": "Incorrect value!\nEnter number between {Min} and {Max}:",
+            "translation": "Неверное значение!\nВведи число от {Min} до {Max}:",
+            "placeholders": [
+                {
+                    "id": "Min",
+                    "string": "%#[1]v",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 1,
+                    "expr": "min"
+                },
+                {
+                    "id": "Max",
+                    "string": "%#[2]v",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 2,
+                    "expr": "max"
+                }
+            ]
+        },
+        {
+            "id": "Send me some image.",
+            "message": "Send me some image.",
+            "translation": "Отправь мне какое-нибудь изображение."
+        },
+        {
+            "id": "All",
+            "message": "All",
+            "translation": "Все"
+        },
+        {
+            "id": "Triangles",
+            "message": "Triangles",
+            "translation": "Треугольники"
+        },
+        {
+            "id": "Rectangles",
+            "message": "Rectangles",
+            "translation": "Прямоугольники"
+        },
+        {
+            "id": "Rotated Rectangles",
+            "message": "Rotated Rectangles",
+            "translation": "Повёрнутые прямоугольники"
+        },
+        {
+            "id": "Circles",
+            "message": "Circles",
+            "translation": "Круги"
+        },
+        {
+            "id": "Ellipses",
+            "message": "Ellipses",
+            "translation": "Эллипсы"
+        },
+        {
+            "id": "Rotated Ellipses",
+            "message": "Rotated Ellipses",
+            "translation": "Повёрнутые эллипсы"
+        },
+        {
+            "id": "Quadrilaterals",
+            "message": "Quadrilaterals",
+            "translation": "Четырёхугольники"
+        },
+        {
+            "id": "Bezier Curves",
+            "message": "Bezier Curves",
+            "translation": "Кривые Безье"
+        },
+        {
+            "id": "Create",
+            "message": "Create",
+            "translation": "Создать"
+        },
+        {
+            "id": "Back",
+            "message": "Back",
+            "translation": "Назад"
+        },
+        {
+            "id": "Shapes",
+            "message": "Shapes",
+            "translation": "Фигуры"
+        },
+        {
+            "id": "Steps",
+            "message": "Steps",
+            "translation": "Шаги"
+        },
+        {
+            "id": "Repetitions",
+            "message": "Repetitions",
+            "translation": "Повторения"
+        },
+        {
+            "id": "Alpha",
+            "message": "Alpha",
+            "translation": "Альфа"
+        },
+        {
+            "id": "Extension",
+            "message": "Extension",
+            "translation": "Расширение"
+        },
+        {
+            "id": "Size",
+            "message": "Size",
+            "translation": "Размеры"
+        },
+        {
+            "id": "Auto",
+            "message": "Auto",
+            "translation": "Автоматически"
+        },
+        {
+            "id": "Other",
+            "message": "Other",
+            "translation": "Другое"
+        },
+        {
+            "id": "Menu:",
+            "message": "Menu:",
+            "translation": "Меню:"
+        },
+        {
+            "id": "Select the shapes to be used to create the image:",
+            "message": "Select the shapes to be used to create the image:",
+            "translation": "Выбери фигуры, из которых будет выстраиваться изображение:"
+        },
+        {
+            "id": "Select the number of steps. Shapes will be drawn at each step:",
+            "message": "Select the number of steps. Shapes will be drawn at each step:",
+            "translation": "Выбери количество шагов. На каждом шаге будут отрисовываться фигуры:"
+        },
+        {
+            "id": "Select the number of shapes to draw in each step:",
+            "message": "Select the number of shapes to draw in each step:",
+            "translation": "Выбери сколько фигур будет отрисовываться на каждой итерации:"
+        },
+        {
+            "id": "Select an alpha-channel value for the shapes:",
+            "message": "Select an alpha-channel value for the shapes:",
+            "translation": "Выбери значение альфа-канала для фигур:"
+        },
+        {
+            "id": "Select an extension of the resulting image:",
+            "message": "Select an extension of the resulting image:",
+            "translation": "Выбери расширение получившегося изображения:"
+        },
+        {
+            "id": "Select a size for the larger side of the resulting image (the aspect ratio will be preserved):",
+            "message": "Select a size for the larger side of the resulting image (the aspect ratio will be preserved):",
+            "translation": "Выбери размер большей стороны получившегося изображения (соотношение сторон будет сохранено):"
+        }
+    ]
+}

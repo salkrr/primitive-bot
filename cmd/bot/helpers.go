@@ -22,15 +22,18 @@ func (app *application) serverError(chatID int64, err error) {
 		app.errorLog.Print(err)
 	}
 
-	_, err = app.bot.SendMessage(chatID, errorMessage)
+	_, err = app.bot.SendMessage(chatID,
+		app.printer.Sprintf("Something gone wrong! Please, try again in a few minutes."))
 	if err != nil {
 		app.errorLog.Print(err)
 	}
 }
 
 func (app *application) createStatusMessage(c primitive.Config, position int) string {
-	return fmt.Sprintf(statusMessage, position, strings.ToLower(menu.ShapeNames[c.Shape]),
-		c.Iterations, c.Repeat, c.Alpha, c.Extension, c.OutputSize)
+	return app.printer.Sprintf(
+		"%d place in the queue.\n\nShapes: %s\nSteps: %d\nRepetitions: %d\nAlpha-channel: %d\nExtension: %s\nSize: %#v",
+		position, strings.ToLower(menu.ShapeNames[c.Shape]), c.Iterations, c.Repeat, c.Alpha, c.Extension, c.OutputSize,
+	)
 }
 
 func (app *application) getInputFromUser(
@@ -40,7 +43,7 @@ func (app *application) getInputFromUser(
 	out chan<- int,
 ) {
 	err := app.bot.EditMessageText(chatID, menuMessageID,
-		fmt.Sprintf(inputMessage, min, max))
+		app.printer.Sprintf("Enter number between %#v and %#v:", min, max))
 	if err != nil {
 		app.serverError(chatID, err)
 		return
@@ -62,7 +65,8 @@ func (app *application) getInputFromUser(
 		}
 
 		// incorrect input
-		err = app.bot.EditMessageText(chatID, menuMessageID, fmt.Sprintf(inputMessage, min, max))
+		err = app.bot.EditMessageText(chatID, menuMessageID,
+			app.printer.Sprintf("Incorrect value!\nEnter number between %#v and %#v:", min, max))
 		if err != nil {
 			if strings.Contains(err.Error(), "400") {
 				// 400 error: message is not modified

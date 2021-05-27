@@ -97,7 +97,8 @@ func (app *application) processMessage(m tg.Message) {
 	if m.Text == "/status" {
 		operations, positions := app.queue.GetOperations(m.From.ID)
 		if len(operations) == 0 {
-			_, err := app.bot.SendMessage(m.Chat.ID, statusEmptyMessage)
+			_, err := app.bot.SendMessage(m.Chat.ID,
+				app.printer.Sprint("There aren't any operations in the queue."))
 			if err != nil {
 				app.serverError(m.Chat.ID, err)
 			}
@@ -115,7 +116,8 @@ func (app *application) processMessage(m tg.Message) {
 	}
 
 	// Send help message
-	_, err := app.bot.SendMessage(m.Chat.ID, helpMessage)
+	_, err := app.bot.SendMessage(m.Chat.ID,
+		app.printer.Sprintf("Send me some image."))
 	if err != nil {
 		app.serverError(m.Chat.ID, err)
 	}

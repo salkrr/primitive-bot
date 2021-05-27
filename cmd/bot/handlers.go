@@ -19,14 +19,16 @@ func (app *application) showRootMenuView(s sessions.Session) {
 func (app *application) handleCreateButton(s sessions.Session) {
 	n := app.queue.GetNumOperations(s.UserID)
 	if n >= app.operationsLimit {
-		if _, err := app.bot.SendMessage(s.UserID, operationsLimitMessage); err != nil {
+		_, err := app.bot.SendMessage(s.UserID,
+			app.printer.Sprintf("You can't add more operations to the queue."))
+		if err != nil {
 			app.serverError(s.UserID, err)
 		}
 		return
 	}
 
-	app.infoLog.Printf(enqueuedLogMessage, s.UserID, s.ImgPath, s.Config.Iterations, s.Config.Shape,
-		s.Config.Alpha, s.Config.Repeat, s.Config.OutputSize, s.Config.Extension)
+	app.infoLog.Printf(enqueuedLogMessage, s.UserID, s.ImgPath, s.Config.Iterations,
+		s.Config.Shape, s.Config.Alpha, s.Config.Repeat, s.Config.OutputSize, s.Config.Extension)
 	pos := app.queue.Enqueue(queue.Operation{
 		UserID:  s.UserID,
 		ImgPath: s.ImgPath,
