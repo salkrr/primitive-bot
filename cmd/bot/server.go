@@ -15,7 +15,7 @@ func (app *application) listenAndServe() {
 
 	offset := int64(0)
 	for {
-		updates, err := app.bot.GetUpdates(offset)
+		updates, err := app.bot.GetUpdates(offset, 100, 20, []string{"message", "callback_query"})
 		if err != nil {
 			app.errorLog.Print(err)
 			continue

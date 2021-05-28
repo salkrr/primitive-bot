@@ -112,7 +112,7 @@ func TestNewActiveSessionsWhenTerminatedSessionIsInInputMenuState(t *testing.T) 
 	as.Set(userID, session)
 
 	// wait for signal from quit channel
-	after := time.After(timeout * 2)
+	after := time.After(100 * time.Millisecond)
 	select {
 	case <-after:
 		t.Error("signal on quit channel was not sent.")

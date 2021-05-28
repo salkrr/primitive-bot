@@ -45,7 +45,4 @@ issues:
       linters:
         - gosec
         - dupl
-    - text: 'G107: Potential HTTP request made with variable url'
-      linters:
-        - gosec
   exclude-use-default: false

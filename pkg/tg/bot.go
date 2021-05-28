@@ -8,11 +8,15 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 const (
 	baseBotURL  = "https://api.telegram.org/bot"
 	baseFileURL = "https://api.telegram.org/file/bot"
+
+	urlencodedContentType = "application/x-www-form-urlencoded"
+	jsonContentType       = "application/json"
 )
 
 // Bot is an instance of a Telegram bot.
@@ -21,23 +25,18 @@ type Bot struct {
 }
 
 // GetUpdates implements Telegram's getUpdates method.
-func (b *Bot) GetUpdates(offset int64) ([]Update, error) {
-	u, err := url.Parse(fmt.Sprintf("%s%s/getUpdates", baseBotURL, b.Token))
-	if err != nil {
-		return nil, err
-	}
-
+func (b *Bot) GetUpdates(offset int64, limit, timeout int, allowedUpdates []string) ([]Update, error) {
 	reqJSON, err := json.Marshal(map[string]interface{}{
 		"offset":          offset,
-		"limit":           100,
-		"timeout":         20,
-		"allowed_updates": []string{"message", "callback_query"},
+		"limit":           limit,
+		"timeout":         timeout,
+		"allowed_updates": allowedUpdates,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := b.sendPostRequest(u.String(), "application/json", bytes.NewBuffer(reqJSON))
+	resp, err := b.makeRequest("/getUpdates", jsonContentType, bytes.NewBuffer(reqJSON))
 	if err != nil {
 		return nil, err
 	}
@@ -62,17 +61,10 @@ func (b *Bot) GetUpdates(offset int64) ([]Update, error) {
 
 // AnswerCallbackQuery implements Telegram's answerCallbackQuery method.
 func (b *Bot) AnswerCallbackQuery(callbackID, text string) error {
-	u, err := url.Parse(fmt.Sprintf("%s%s/answerCallbackQuery", baseBotURL, b.Token))
-	if err != nil {
-		return err
-	}
-
 	q := url.Values{}
 	q.Set("callback_query_id", callbackID)
 	q.Set("text", text)
-	u.RawQuery = q.Encode()
-
-	_, err = b.sendGetRequest(u.String())
+	_, err := b.makeRequest("/answerCallbackQuery", urlencodedContentType, strings.NewReader(q.Encode()))
 	if err != nil {
 		return err
 	}
@@ -82,11 +74,6 @@ func (b *Bot) AnswerCallbackQuery(callbackID, text string) error {
 
 // EditMessageText implements Telegram's editMessageText method.
 func (b *Bot) EditMessageText(chatID, messageID int64, text string, keyboard ...InlineKeyboardMarkup) error {
-	u, err := url.Parse(fmt.Sprintf("%s%s/editMessageText", baseBotURL, b.Token))
-	if err != nil {
-		return err
-	}
-
 	params := map[string]interface{}{
 		"chat_id":    chatID,
 		"message_id": messageID,
@@ -102,7 +89,7 @@ func (b *Bot) EditMessageText(chatID, messageID int64, text string, keyboard ...
 		return err
 	}
 
-	_, err = b.sendPostRequest(u.String(), "application/json", bytes.NewBuffer(jsonBody))
+	_, err = b.makeRequest("/editMessageText", jsonContentType, bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return err
 	}
@@ -116,7 +103,6 @@ func (b *Bot) SendMessage(chatID int64, message string, keyboard ...InlineKeyboa
 		"chat_id": chatID,
 		"text":    message,
 	}
-
 	if len(keyboard) > 0 {
 		params["reply_markup"] = keyboard[0]
 	}
@@ -126,12 +112,7 @@ func (b *Bot) SendMessage(chatID int64, message string, keyboard ...InlineKeyboa
 		return Message{}, err
 	}
 
-	u, err := url.Parse(fmt.Sprintf("%s%s/sendMessage", baseBotURL, b.Token))
-	if err != nil {
-		return Message{}, err
-	}
-
-	resp, err := b.sendPostRequest(u.String(), "application/json", bytes.NewBuffer(jsonBody))
+	resp, err := b.makeRequest("/sendMessage", jsonContentType, bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return Message{}, err
 	}
@@ -150,7 +131,7 @@ func (b *Bot) SendMessage(chatID int64, message string, keyboard ...InlineKeyboa
 	return result, nil
 }
 
-// SendDocument implements0 Telegram's sendDocument method.
+// SendDocument implements Telegram's sendDocument method.
 func (b *Bot) SendDocument(chatID int64, documentPath string) error {
 	w, formBody, err := createMultipartForm("document", documentPath)
 	if err != nil {
@@ -177,7 +158,7 @@ func (b *Bot) SendDocument(chatID int64, documentPath string) error {
 		return err
 	}
 
-	var respContent Response
+	var respContent APIResponse
 	err = json.Unmarshal(body, &respContent)
 	if err != nil {
 		return err
@@ -192,17 +173,11 @@ func (b *Bot) SendDocument(chatID int64, documentPath string) error {
 
 // DeleteMessage implements Telegram's deleteMessage method.
 func (b *Bot) DeleteMessage(chatID, messageID int64) error {
-	u, err := url.Parse(fmt.Sprintf("%s%s/deleteMessage", baseBotURL, b.Token))
-	if err != nil {
-		return err
-	}
-
 	q := url.Values{}
 	q.Set("chat_id", fmt.Sprint(chatID))
 	q.Set("message_id", fmt.Sprint(messageID))
-	u.RawQuery = q.Encode()
 
-	_, err = b.sendGetRequest(u.String())
+	_, err := b.makeRequest("/deleteMessage", urlencodedContentType, strings.NewReader(q.Encode()))
 	if err != nil {
 		return err
 	}
@@ -212,16 +187,10 @@ func (b *Bot) DeleteMessage(chatID, messageID int64) error {
 
 // GetFile implements Telegram's getFile method.
 func (b *Bot) GetFile(fileID string) (File, error) {
-	u, err := url.Parse(fmt.Sprintf("%s%s/getFile", baseBotURL, b.Token))
-	if err != nil {
-		return File{}, err
-	}
-
 	q := url.Values{}
 	q.Set("file_id", fileID)
-	u.RawQuery = q.Encode()
 
-	resp, err := b.sendGetRequest(u.String())
+	resp, err := b.makeRequest("/getFile", urlencodedContentType, strings.NewReader(q.Encode()))
 	if err != nil {
 		return File{}, err
 	}
@@ -270,51 +239,28 @@ func (b *Bot) DownloadFile(fileID string) ([]byte, error) {
 	return body, nil
 }
 
-func (b *Bot) sendPostRequest(url string, contentType string, formBody *bytes.Buffer) (Response, error) {
-	resp, err := http.Post(url, contentType, formBody)
+func (b *Bot) makeRequest(method string, contentType string, body io.Reader) (APIResponse, error) {
+	u := fmt.Sprint(baseBotURL + b.Token + method)
+
+	resp, err := http.Post(u, contentType, body) // #nosec
 	if err != nil {
-		return Response{}, err
+		return APIResponse{}, err
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
+	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return Response{}, err
+		return APIResponse{}, err
 	}
 
-	var respContent Response
-	err = json.Unmarshal(body, &respContent)
+	var respContent APIResponse
+	err = json.Unmarshal(respBody, &respContent)
 	if err != nil {
-		return Response{}, err
+		return APIResponse{}, err
 	}
 
 	if !respContent.Ok {
-		return Response{}, fmt.Errorf("error code: %v; description: %s", respContent.ErrorCode, respContent.Description)
-	}
-
-	return respContent, nil
-}
-
-func (b *Bot) sendGetRequest(url string) (Response, error) {
-	resp, err := http.Get(url)
-	if err != nil {
-		return Response{}, err
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return Response{}, err
-	}
-
-	var respContent Response
-	err = json.Unmarshal(body, &respContent)
-	if err != nil {
-		return Response{}, err
-	}
-
-	if !respContent.Ok {
-		return Response{}, fmt.Errorf("error code: %v; description: %s", respContent.ErrorCode, respContent.Description)
+		return APIResponse{}, fmt.Errorf("error code: %v; description: %s", respContent.ErrorCode, respContent.Description)
 	}
 
 	return respContent, nil

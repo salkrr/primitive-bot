@@ -76,8 +76,8 @@ type Update struct {
 	CallbackQuery CallbackQuery `json:"callback_query"`
 }
 
-// Response is a response to a request to the Telegram API.
-type Response struct {
+// APIResponse is a response to a request to the Telegram API.
+type APIResponse struct {
 	Ok          bool        `json:"ok"`
 	ErrorCode   int         `json:"error_code"`
 	Description string      `json:"description"`
