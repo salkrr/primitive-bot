@@ -42,11 +42,8 @@ func TestNewSession(t *testing.T) {
 }
 
 func TestNewActiveSessionsStartsTimeouterThatTerminatesInactiveSessions(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
-	timeout := time.Millisecond
-	frequency := time.Millisecond
+	timeout := 10 * time.Millisecond
+	frequency := 5 * time.Millisecond
 	var userID int64 = 123456789
 	session := NewSession(userID, 123, "img.png")
 
@@ -66,9 +63,6 @@ func TestNewActiveSessionsStartsTimeouterThatTerminatesInactiveSessions(t *testi
 }
 
 func TestNewActiveSessionsStartsTimeouterThatDoesNotTerminateActiveSessions(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
 	timeout := 50 * time.Millisecond
 	frequency := 10 * time.Millisecond
 	var userID int64 = 123456789
@@ -96,9 +90,6 @@ func TestNewActiveSessionsStartsTimeouterThatDoesNotTerminateActiveSessions(t *t
 }
 
 func TestNewActiveSessionsWhenTerminatedSessionIsInInputMenuState(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
 	timeout := time.Millisecond
 	frequency := time.Millisecond
 	var userID int64 = 123456789
