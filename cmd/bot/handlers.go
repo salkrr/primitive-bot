@@ -9,7 +9,6 @@ import (
 	"github.com/lazy-void/primitive-bot/pkg/menu"
 
 	"github.com/lazy-void/primitive-bot/pkg/sessions"
-	"github.com/lazy-void/primitive-bot/pkg/tg"
 )
 
 func (app *application) showRootMenuView(s sessions.Session) {
@@ -77,23 +76,22 @@ func (app *application) handleIterButton(s sessions.Session, n int) {
 }
 
 func (app *application) handleIterInput(s sessions.Session) {
-	in := make(chan tg.Message)
-	out := make(chan int)
+	ch := make(chan int)
+	go app.getInputFromUser(s, 1, 5000, ch)
 
-	// Get user input
-	s.InChan = in
+	num, ok := <-ch
+	if !ok {
+		// If input menu was closed
+		return
+	}
+
+	s.Config.Iterations = num
 	app.sessions.Set(s.UserID, s)
-
-	go app.getInputFromUser(s.UserID, s.MenuMessageID, 1, 5000, in, out)
-
-	s.Config.Iterations = <-out
-	s.InChan = nil
-	app.sessions.Set(s.UserID, s)
-	close(in)
 
 	buttonText := fmt.Sprintf("%s (%d)", menu.OtherButtonText, s.Config.Iterations)
 	s.Menu.IterView = menu.NewMenuView(
-		menu.IterViewTmpl, menu.IterInputCallback, buttonText)
+		menu.IterViewTmpl, menu.IterInputCallback, buttonText,
+	)
 	app.sessions.Set(s.UserID, s)
 
 	app.showMenuView(s.UserID, s.MenuMessageID, s.Menu.IterView)
@@ -137,23 +135,22 @@ func (app *application) handleAlphaButton(s sessions.Session, n int) {
 }
 
 func (app *application) handleAlphaInput(s sessions.Session) {
-	in := make(chan tg.Message)
-	out := make(chan int)
+	ch := make(chan int)
+	go app.getInputFromUser(s, 1, 255, ch)
 
-	// Get user input
-	s.InChan = in
+	num, ok := <-ch
+	if !ok {
+		// If input menu was closed
+		return
+	}
+
+	s.Config.Alpha = num
 	app.sessions.Set(s.UserID, s)
-
-	go app.getInputFromUser(s.UserID, s.MenuMessageID, 1, 255, in, out)
-
-	s.Config.Alpha = <-out
-	s.InChan = nil
-	app.sessions.Set(s.UserID, s)
-	close(in)
 
 	buttonText := fmt.Sprintf("%s (%d)", menu.OtherButtonText, s.Config.Alpha)
 	s.Menu.AlphaView = menu.NewMenuView(
-		menu.AlphaViewTmpl, menu.AlphaInputCallback, buttonText)
+		menu.AlphaViewTmpl, menu.AlphaInputCallback, buttonText,
+	)
 	app.sessions.Set(s.UserID, s)
 
 	app.showMenuView(s.UserID, s.MenuMessageID, s.Menu.AlphaView)
@@ -195,23 +192,22 @@ func (app *application) handleSizeButton(s sessions.Session, n int) {
 }
 
 func (app *application) handleSizeInput(s sessions.Session) {
-	in := make(chan tg.Message)
-	out := make(chan int)
+	ch := make(chan int)
+	go app.getInputFromUser(s, 256, 3840, ch)
 
-	// Get user input
-	s.InChan = in
+	num, ok := <-ch
+	if !ok {
+		// If the input menu was closed
+		return
+	}
+
+	s.Config.OutputSize = num
 	app.sessions.Set(s.UserID, s)
-
-	go app.getInputFromUser(s.UserID, s.MenuMessageID, 256, 3840, in, out)
-
-	s.Config.OutputSize = <-out
-	s.InChan = nil
-	app.sessions.Set(s.UserID, s)
-	close(in)
 
 	buttonText := fmt.Sprintf("%s (%d)", menu.OtherButtonText, s.Config.OutputSize)
 	s.Menu.SizeView = menu.NewMenuView(
-		menu.SizeViewTmpl, menu.SizeInputCallback, buttonText)
+		menu.SizeViewTmpl, menu.SizeInputCallback, buttonText,
+	)
 	app.sessions.Set(s.UserID, s)
 
 	app.showMenuView(s.UserID, s.MenuMessageID, s.Menu.SizeView)

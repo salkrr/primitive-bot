@@ -8,10 +8,11 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/lazy-void/primitive-bot/pkg/sessions"
+
 	"github.com/lazy-void/primitive-bot/pkg/menu"
 
 	"github.com/lazy-void/primitive-bot/pkg/primitive"
-	"github.com/lazy-void/primitive-bot/pkg/tg"
 )
 
 func (app *application) serverError(chatID int64, err error) {
@@ -37,43 +38,57 @@ func (app *application) createStatusMessage(c primitive.Config, position int) st
 }
 
 func (app *application) getInputFromUser(
-	chatID, menuMessageID int64,
+	s sessions.Session,
 	min, max int,
-	in <-chan tg.Message,
 	out chan<- int,
 ) {
-	err := app.bot.EditMessageText(chatID, menuMessageID,
+	// We need to communicate that input menu was closed
+	// in case of server error or if session was terminated
+	defer close(out)
+
+	s.State = sessions.InInputDialog
+	app.sessions.Set(s.UserID, s)
+
+	err := app.bot.EditMessageText(s.UserID, s.MenuMessageID,
 		app.printer.Sprintf("Enter number between %#v and %#v:", min, max))
 	if err != nil {
-		app.serverError(chatID, err)
+		app.serverError(s.UserID, err)
 		return
 	}
 
 	for {
-		userMsg := <-in
-		if err := app.bot.DeleteMessage(userMsg.Chat.ID, userMsg.MessageID); err != nil {
-			app.serverError(chatID, err)
-			return
-		}
-
-		userInput, err := strconv.Atoi(userMsg.Text)
-		// correct input
-		if err == nil && userInput >= min && userInput <= max {
-			out <- userInput
-			close(out)
-			return
-		}
-
-		// incorrect input
-		err = app.bot.EditMessageText(chatID, menuMessageID,
-			app.printer.Sprintf("Incorrect value!\nEnter number between %#v and %#v:", min, max))
-		if err != nil {
-			if strings.Contains(err.Error(), "400") {
-				// 400 error: message is not modified
-				// and we don't care in this case
-				continue
+		select {
+		case msg := <-s.Input:
+			// Delete message with user input
+			err := app.bot.DeleteMessage(msg.Chat.ID, msg.MessageID)
+			if err != nil {
+				app.serverError(s.UserID, err)
+				return
 			}
-			app.serverError(chatID, err)
+
+			userInput, err := strconv.Atoi(msg.Text)
+			// correct input
+			if err == nil && userInput >= min && userInput <= max {
+				s.State = sessions.InMenu
+				out <- userInput
+				return
+			}
+
+			// incorrect input
+			err = app.bot.EditMessageText(
+				s.UserID, s.MenuMessageID,
+				app.printer.Sprintf("Incorrect value!\nEnter number between %#v and %#v:", min, max),
+			)
+			if err != nil {
+				if strings.Contains(err.Error(), "400") {
+					// 400 error: message is not modified
+					// and we don't care in this case
+					break
+				}
+				app.serverError(s.UserID, err)
+				return
+			}
+		case <-s.QuitInput:
 			return
 		}
 	}

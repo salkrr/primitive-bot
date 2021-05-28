@@ -45,7 +45,7 @@ func (app *application) listenAndServe() {
 
 func (app *application) worker() {
 	for {
-		// If we delete the operation from the queue with Dequeue
+		// If we'll delete the operation from the queue with Dequeue
 		// then if user will use command '/status', we won't be able to
 		// send him any information about this operation (it is not in the
 		// queue so we have no idea if it exists or not)
@@ -87,10 +87,10 @@ func (app *application) processMessage(m tg.Message) {
 		return
 	}
 
-	// Handle user input if they are inside input form
+	// Handle user input if they are inside the input form
 	s, ok := app.sessions.Get(m.From.ID)
-	if ok && s.InChan != nil {
-		s.InChan <- m
+	if ok && s.State == sessions.InInputDialog {
+		s.Input <- m
 		return
 	}
 

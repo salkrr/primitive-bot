@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/lazy-void/primitive-bot/pkg/menu"
 
@@ -43,10 +44,29 @@ func main() {
 	inDir := flag.String("i", "inputs", "Name of the directory where inputs will be stored.")
 	outDir := flag.String("o", "outputs", "Name of the directory where outputs will be stored.")
 	logPath := flag.String("log", "", "Path to the previous log file. It is used to restore queue.")
-	operationsLimit := flag.Int("limit", 5, "The number of operations that the user can add to the queue.")
+	operationsLimit := flag.Int("limit", 5,
+		"The number of operations that the user can add to the queue.")
+
+	var timeout time.Duration
+	flag.Func("timeout",
+		`The number of minutes that a session can be inactive before it's terminated. (default "30m")`,
+		func(s string) error {
+			if s == "" {
+				timeout = 30 * time.Minute
+				return nil
+			}
+
+			d, err := time.ParseDuration(s)
+			if err != nil {
+				return err
+			}
+
+			timeout = d
+			return nil
+		})
 
 	var lang language.Tag
-	flag.Func("lang", "Language of the bot (en, ru).", func(s string) error {
+	flag.Func("lang", `Language of the bot (en, ru). (default "en")`, func(s string) error {
 		if s == "" {
 			lang = language.English
 			return nil
@@ -65,6 +85,7 @@ func main() {
 		log.Fatal("You need to provide the token for the Telegram Bot!")
 	}
 
+	// restore queue if needed
 	q := queue.New()
 	if *logPath != "" {
 		err := restoreQueue(*logPath, q)
@@ -73,6 +94,7 @@ func main() {
 		}
 	}
 
+	// create directories for input and output
 	if err := os.MkdirAll(*inDir, 0664); err != nil {
 		log.Fatal(err)
 	}
@@ -95,11 +117,11 @@ func main() {
 		outDir:          *outDir,
 		operationsLimit: *operationsLimit,
 		bot:             &tg.Bot{Token: *token},
-		sessions:        sessions.NewActiveSessions(),
+		sessions:        sessions.NewActiveSessions(timeout, 5*time.Minute),
 		queue:           q,
 	}
 
-	infoLog.Printf("Starting to listen for updates...")
+	infoLog.Printf("Starting to listen for the updates...")
 	app.listenAndServe()
 }
 
