@@ -8,8 +8,8 @@ import (
 	"github.com/lazy-void/primitive-bot/pkg/primitive"
 )
 
-// Operation contains information needed to create
-// primitive image.
+// Operation object contains information
+// needed to create primitive image.
 type Operation struct {
 	UserID  int64
 	ImgPath string
@@ -57,7 +57,7 @@ func (q *Queue) Dequeue() (Operation, bool) {
 	return e.Value.(Operation), true
 }
 
-// Peek returns firsth element of the queue.
+// Peek returns first element of the queue.
 // If the queue is empty then second return parameter
 // will be equal to false.
 func (q *Queue) Peek() (Operation, bool) {
@@ -90,16 +90,16 @@ func (q *Queue) GetOperations(userID int64) ([]Operation, []int) {
 	return operations, positions
 }
 
-// GetNumOperations returns the number of operations with specified chatID
-// that are currently in the queue.
-func (q *Queue) GetNumOperations(chatID int64) int {
+// GetNumOperations returns the number of operations
+// with specified userID that are currently in the queue.
+func (q *Queue) GetNumOperations(userID int64) int {
 	q.mu.Lock()
 	defer q.mu.Unlock()
 
 	counter := 0
 	for i, e := 1, q.elements.Front(); e != nil; i, e = i+1, e.Next() {
 		op := e.Value.(Operation)
-		if op.UserID == chatID {
+		if op.UserID == userID {
 			counter++
 		}
 	}
