@@ -34,7 +34,7 @@ var (
 
 // InitText initializes all global variables that contain text
 // and also keyboard and view templates.
-func InitText(p message.Printer) {
+func InitText(p *message.Printer) {
 	ShapeNames = map[primitive.Shape]string{
 		primitive.ShapeAny:              p.Sprintf("All"),
 		primitive.ShapeTriangle:         p.Sprintf("Triangles"),

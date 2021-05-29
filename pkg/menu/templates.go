@@ -247,8 +247,10 @@ func initViewTemplates() {
 	}
 }
 
-// NewMenuView creates new View from the template
-// adding symbol to the option that is chosen at the moment.
+// NewMenuView creates new View from the template. The second
+// parameter specifies callback of the option that is selected
+// in the moment. Selected option will be marked with the special symbol.
+// Optional parameter allows to specify new text for the button.
 func NewMenuView(
 	template View,
 	selectedCallback string,

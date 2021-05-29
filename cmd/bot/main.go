@@ -107,7 +107,7 @@ func main() {
 
 	// initialize localization
 	printer := message.NewPrinter(lang)
-	menu.InitText(*printer)
+	menu.InitText(printer)
 
 	app := application{
 		infoLog:         infoLog,

@@ -17,7 +17,7 @@ func TestNewSession(t *testing.T) {
 	imgPath := "path/to/image.png"
 	expectedConfig := primitive.NewConfig()
 	expectedMenu := menu.New(expectedConfig)
-	menu.InitText(*message.NewPrinter(language.English))
+	menu.InitText(message.NewPrinter(language.English))
 
 	s := NewSession(userID, menuMessageID, imgPath)
 
