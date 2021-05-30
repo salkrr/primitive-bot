@@ -146,7 +146,7 @@ func (app *application) processPhoto(m tg.Message) {
 		app.serverError(m.Chat.ID, err)
 		return
 	}
-	app.sessions.Set(m.From.ID, sessions.NewSession(m.From.ID, msg.MessageID, path))
+	app.sessions.Set(m.From.ID, sessions.NewSession(m.From.ID, msg.MessageID, path, app.workers))
 }
 
 func (app *application) downloadPhoto(photos []tg.PhotoSize) (string, error) {

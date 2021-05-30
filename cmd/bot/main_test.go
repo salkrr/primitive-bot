@@ -10,6 +10,7 @@ import (
 )
 
 func TestRestoreQueue(t *testing.T) {
+	workers := 1
 	tests := []struct {
 		name       string
 		logData    string
@@ -28,7 +29,7 @@ INFO	2021/05/23 16:00:49 Creating: user id 295434263 | input inputs/AQADntiNoi4A
 				{
 					UserID:  295434263,
 					ImgPath: "inputs/AQADntiNoi4AAwSIAgAB.jpg",
-					Config:  primitive.NewConfig(),
+					Config:  primitive.New(workers),
 				},
 			},
 		},
@@ -65,7 +66,7 @@ INFO	2021/05/23 16:49:20 Sent: user id 295434263 | output outputs/295434263_1621
 					UserID:  295434263,
 					ImgPath: "inputs/AQADntiNoi4AAwSIAgAB.jpg",
 					Config: func() primitive.Config {
-						c := primitive.NewConfig()
+						c := primitive.New(workers)
 						c.Iterations = 20
 						c.Shape = 2
 						return c
@@ -75,7 +76,7 @@ INFO	2021/05/23 16:49:20 Sent: user id 295434263 | output outputs/295434263_1621
 					UserID:  295434263,
 					ImgPath: "inputs/AQADntiNoi4AAwSIAgAB.jpg",
 					Config: func() primitive.Config {
-						c := primitive.NewConfig()
+						c := primitive.New(workers)
 						c.Iterations = 30
 						c.Shape = 1
 						return c
@@ -144,7 +145,7 @@ INFO	2021/05/23 16:54:33 Sent: user id 295434263 | output outputs/295434263_1621
 			}
 
 			// restore queue
-			if err = restoreQueue(logPath, q); err != nil {
+			if err = restoreQueue(logPath, q, workers); err != nil {
 				t.Error(err)
 			}
 

@@ -15,11 +15,11 @@ import (
 func TestNewSession(t *testing.T) {
 	var userID, menuMessageID int64 = 123456789, 987654321
 	imgPath := "path/to/image.png"
-	expectedConfig := primitive.NewConfig()
+	expectedConfig := primitive.New(1)
 	expectedMenu := menu.New(expectedConfig)
 	menu.InitText(message.NewPrinter(language.English))
 
-	s := NewSession(userID, menuMessageID, imgPath)
+	s := NewSession(userID, menuMessageID, imgPath, 1)
 
 	switch {
 	case s.UserID != userID:
@@ -45,7 +45,7 @@ func TestNewActiveSessionsStartsTimeouterThatTerminatesInactiveSessions(t *testi
 	timeout := 10 * time.Millisecond
 	frequency := 5 * time.Millisecond
 	var userID int64 = 123456789
-	session := NewSession(userID, 123, "img.png")
+	session := NewSession(userID, 123, "img.png", 1)
 
 	// create
 	as := NewActiveSessions(timeout, frequency)
@@ -66,7 +66,7 @@ func TestNewActiveSessionsStartsTimeouterThatDoesNotTerminateActiveSessions(t *t
 	timeout := 50 * time.Millisecond
 	frequency := 10 * time.Millisecond
 	var userID int64 = 123456789
-	session := NewSession(userID, 123, "img.png")
+	session := NewSession(userID, 123, "img.png", 1)
 
 	// create
 	as := NewActiveSessions(timeout, frequency)
@@ -93,7 +93,7 @@ func TestNewActiveSessionsWhenTerminatedSessionIsInInputMenuState(t *testing.T) 
 	timeout := time.Millisecond
 	frequency := time.Millisecond
 	var userID int64 = 123456789
-	session := NewSession(userID, 123, "img.png")
+	session := NewSession(userID, 123, "img.png", 1)
 	session.State = InInputDialog
 
 	// create
@@ -115,7 +115,7 @@ func TestActiveSessions_Set(t *testing.T) {
 	timeout := 100 * time.Second
 	frequency := 100 * time.Second
 	var userID int64 = 123456789
-	session := NewSession(userID, 123, "img.png")
+	session := NewSession(userID, 123, "img.png", 1)
 
 	as := NewActiveSessions(timeout, frequency)
 
@@ -145,7 +145,7 @@ func TestActiveSessions_Get(t *testing.T) {
 	timeout := 100 * time.Second
 	frequency := 100 * time.Second
 	var userID int64 = 123456789
-	session := NewSession(userID, 123, "img.png")
+	session := NewSession(userID, 123, "img.png", 1)
 
 	as := NewActiveSessions(timeout, frequency)
 

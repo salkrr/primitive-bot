@@ -4,7 +4,6 @@ package primitive
 
 import (
 	"math/rand"
-	"runtime"
 	"time"
 
 	"github.com/fogleman/primitive/primitive"
@@ -38,10 +37,10 @@ type Config struct {
 	Extension  string
 }
 
-// NewConfig initializes instance of Config.
-func NewConfig() Config {
+// New initializes the instance of Config.
+func New(workers int) Config {
 	return Config{
-		workers:    runtime.NumCPU(),
+		workers:    workers,
 		OutputSize: 1280,
 		Shape:      ShapeAny,
 		Iterations: 200,

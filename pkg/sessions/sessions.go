@@ -34,8 +34,8 @@ type Session struct {
 }
 
 // NewSession initializes new instance of Session object.
-func NewSession(userID, menuMessageID int64, imgPath string) Session {
-	c := primitive.NewConfig()
+func NewSession(userID, menuMessageID int64, imgPath string, workers int) Session {
+	c := primitive.New(workers)
 
 	return Session{
 		lastRequest:   time.Now(),

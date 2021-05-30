@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
 
@@ -27,6 +28,17 @@ import (
 	"github.com/lazy-void/primitive-bot/pkg/tg"
 )
 
+var (
+	token           string
+	inDir           string
+	outDir          string
+	logPath         string
+	operationsLimit int
+	workers         int
+	timeout         time.Duration
+	lang            language.Tag
+)
+
 type application struct {
 	infoLog         *log.Logger
 	errorLog        *log.Logger
@@ -34,20 +46,20 @@ type application struct {
 	inDir           string
 	outDir          string
 	operationsLimit int
+	workers         int
 	bot             *tg.Bot
 	sessions        *sessions.ActiveSessions
 	queue           *queue.Queue
 }
 
-func main() {
-	token := flag.String("token", "", "The token for the Telegram Bot.")
-	inDir := flag.String("i", "inputs", "Name of the directory where inputs will be stored.")
-	outDir := flag.String("o", "outputs", "Name of the directory where outputs will be stored.")
-	logPath := flag.String("log", "", "Path to the previous log file. It is used to restore queue.")
-	operationsLimit := flag.Int("limit", 5,
+func init() {
+	flag.StringVar(&token, "token", "", "The token for the Telegram Bot.")
+	flag.StringVar(&inDir, "i", "inputs", "Name of the directory where inputs will be stored.")
+	flag.StringVar(&outDir, "o", "outputs", "Name of the directory where outputs will be stored.")
+	flag.IntVar(&workers, "w", runtime.NumCPU(), "Numbers of parallel workers used to create primitive image.")
+	flag.StringVar(&logPath, "log", "", "Path to the previous log file. It is used to restore queue.")
+	flag.IntVar(&operationsLimit, "limit", 5,
 		"The number of operations that the user can add to the queue.")
-
-	var timeout time.Duration
 	flag.Func("timeout",
 		`The number of minutes that a session can be inactive before it's terminated. (default "30m")`,
 		func(s string) error {
@@ -64,8 +76,6 @@ func main() {
 			timeout = d
 			return nil
 		})
-
-	var lang language.Tag
 	flag.Func("lang", `Language of the bot (en, ru). (default "en")`, func(s string) error {
 		if s == "" {
 			lang = language.English
@@ -79,26 +89,29 @@ func main() {
 		lang = language.MustParse(s)
 		return nil
 	})
+}
+
+func main() {
 	flag.Parse()
 
-	if *token == "" {
+	if token == "" {
 		log.Fatal("You need to provide the token for the Telegram Bot!")
 	}
 
 	// restore queue if needed
 	q := queue.New()
-	if *logPath != "" {
-		err := restoreQueue(*logPath, q)
+	if logPath != "" {
+		err := restoreQueue(logPath, q, workers)
 		if err != nil {
 			log.Fatalf("Error restoring queue from the log: %v", err)
 		}
 	}
 
 	// create directories for input and output
-	if err := os.MkdirAll(*inDir, 0664); err != nil {
+	if err := os.MkdirAll(inDir, 0664); err != nil {
 		log.Fatal(err)
 	}
-	if err := os.MkdirAll(*outDir, 0664); err != nil {
+	if err := os.MkdirAll(outDir, 0664); err != nil {
 		log.Fatal(err)
 	}
 
@@ -113,10 +126,11 @@ func main() {
 		infoLog:         infoLog,
 		errorLog:        errorLog,
 		printer:         printer,
-		inDir:           *inDir,
-		outDir:          *outDir,
-		operationsLimit: *operationsLimit,
-		bot:             &tg.Bot{Token: *token},
+		inDir:           inDir,
+		outDir:          outDir,
+		operationsLimit: operationsLimit,
+		workers:         workers,
+		bot:             &tg.Bot{Token: token},
 		sessions:        sessions.NewActiveSessions(timeout, 5*time.Minute),
 		queue:           q,
 	}
@@ -125,7 +139,7 @@ func main() {
 	app.listenAndServe()
 }
 
-func restoreQueue(logPath string, q *queue.Queue) (err error) {
+func restoreQueue(logPath string, q *queue.Queue, workers int) (err error) {
 	f, err := os.Open(filepath.Clean(logPath))
 	if err != nil {
 		return err
@@ -145,7 +159,7 @@ func restoreQueue(logPath string, q *queue.Queue) (err error) {
 
 		msg := matches[1]
 		if strings.HasPrefix(msg, "Enqueued:") {
-			op := queue.Operation{Config: primitive.NewConfig()}
+			op := queue.Operation{Config: primitive.New(workers)}
 			_, err := fmt.Sscanf(msg, enqueuedLogMessage, &op.UserID, &op.ImgPath,
 				&op.Config.Iterations, &op.Config.Shape, &op.Config.Alpha,
 				&op.Config.Repeat, &op.Config.OutputSize, &op.Config.Extension)
