@@ -61,7 +61,7 @@ func (app *application) showIterMenuView(s sessions.Session) {
 }
 
 func (app *application) handleIterButton(s sessions.Session, n int) {
-	if n > 5000 {
+	if n > app.maxIter {
 		return
 	}
 	s.Config.Iterations = n
@@ -77,7 +77,7 @@ func (app *application) handleIterButton(s sessions.Session, n int) {
 
 func (app *application) handleIterInput(s sessions.Session) {
 	ch := make(chan int)
-	go app.getInputFromUser(s, 1, 5000, ch)
+	go app.getInputFromUser(s, 1, app.maxIter, ch)
 
 	num, ok := <-ch
 	if !ok {

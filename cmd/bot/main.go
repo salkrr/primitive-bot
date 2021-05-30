@@ -34,6 +34,7 @@ var (
 	outDir          string
 	logPath         string
 	operationsLimit int
+	maxIter         int
 	workers         int
 	timeout         time.Duration
 	lang            language.Tag
@@ -46,6 +47,7 @@ type application struct {
 	inDir           string
 	outDir          string
 	operationsLimit int
+	maxIter         int
 	workers         int
 	bot             *tg.Bot
 	sessions        *sessions.ActiveSessions
@@ -56,10 +58,11 @@ func init() {
 	flag.StringVar(&token, "token", "", "The token for the Telegram Bot.")
 	flag.StringVar(&inDir, "i", "inputs", "Name of the directory where inputs will be stored.")
 	flag.StringVar(&outDir, "o", "outputs", "Name of the directory where outputs will be stored.")
-	flag.IntVar(&workers, "w", runtime.NumCPU(), "Numbers of parallel workers used to create primitive image.")
 	flag.StringVar(&logPath, "log", "", "Path to the previous log file. It is used to restore queue.")
+	flag.IntVar(&workers, "w", runtime.NumCPU(), "Numbers of parallel workers used to create primitive image.")
 	flag.IntVar(&operationsLimit, "limit", 5,
 		"The number of operations that the user can add to the queue.")
+	flag.IntVar(&maxIter, "iter", 2000, "Maximum iterations that user can specify.")
 	flag.Func("timeout",
 		`The number of minutes that a session can be inactive before it's terminated. (default "30m")`,
 		func(s string) error {
@@ -129,6 +132,7 @@ func main() {
 		inDir:           inDir,
 		outDir:          outDir,
 		operationsLimit: operationsLimit,
+		maxIter:         maxIter,
 		workers:         workers,
 		bot:             &tg.Bot{Token: token},
 		sessions:        sessions.NewActiveSessions(timeout, 5*time.Minute),
