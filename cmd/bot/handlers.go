@@ -177,7 +177,7 @@ func (app *application) showSizeMenuView(s sessions.Session) {
 }
 
 func (app *application) handleSizeButton(s sessions.Session, n int) {
-	if n < 256 || n > 1920 {
+	if n < 256 || n > app.maxSize {
 		return
 	}
 	s.Config.OutputSize = n
@@ -193,7 +193,7 @@ func (app *application) handleSizeButton(s sessions.Session, n int) {
 
 func (app *application) handleSizeInput(s sessions.Session) {
 	ch := make(chan int)
-	go app.getInputFromUser(s, 256, 3840, ch)
+	go app.getInputFromUser(s, 256, app.maxSize, ch)
 
 	num, ok := <-ch
 	if !ok {

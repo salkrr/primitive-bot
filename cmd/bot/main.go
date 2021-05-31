@@ -35,6 +35,7 @@ var (
 	logPath         string
 	operationsLimit int
 	maxIter         int
+	maxSize         int
 	workers         int
 	timeout         time.Duration
 	lang            language.Tag
@@ -48,6 +49,7 @@ type application struct {
 	outDir          string
 	operationsLimit int
 	maxIter         int
+	maxSize         int
 	workers         int
 	bot             *tg.Bot
 	sessions        *sessions.ActiveSessions
@@ -63,6 +65,7 @@ func init() {
 	flag.IntVar(&operationsLimit, "limit", 5,
 		"The number of operations that the user can add to the queue.")
 	flag.IntVar(&maxIter, "iter", 2000, "Maximum iterations that user can specify.")
+	flag.IntVar(&maxSize, "size", 3840, "Maximum image size that user can specify.")
 	flag.Func("timeout",
 		`The number of minutes that a session can be inactive before it's terminated. (default "30m")`,
 		func(s string) error {
@@ -133,6 +136,7 @@ func main() {
 		outDir:          outDir,
 		operationsLimit: operationsLimit,
 		maxIter:         maxIter,
+		maxSize:         maxSize,
 		workers:         workers,
 		bot:             &tg.Bot{Token: token},
 		sessions:        sessions.NewActiveSessions(timeout, 5*time.Minute),
