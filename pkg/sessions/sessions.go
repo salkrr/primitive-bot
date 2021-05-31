@@ -108,7 +108,12 @@ func (as *ActiveSessions) timeouter(d time.Duration) {
 		for _, s := range as.sessions {
 			if time.Since(s.lastRequest) > as.timeout {
 				if s.State == InInputDialog {
-					s.QuitInput <- 1
+					select {
+					case s.QuitInput <- 1:
+						break
+					default:
+						panic("nobody listens on the QuitInput channel")
+					}
 				}
 
 				delete(as.sessions, s.UserID)
