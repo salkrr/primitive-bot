@@ -18,11 +18,7 @@ func (app *application) showRootMenuView(s sessions.Session) {
 func (app *application) handleCreateButton(s sessions.Session) {
 	n := app.queue.GetNumOperations(s.UserID)
 	if n >= app.operationsLimit {
-		_, err := app.bot.SendMessage(s.UserID,
-			app.printer.Sprintf("You can't add more operations to the queue."))
-		if err != nil {
-			app.serverError(s.UserID, err)
-		}
+		app.sendMessage(s.UserID, app.printer.Sprintf("You can't add more operations to the queue."))
 		return
 	}
 
@@ -34,10 +30,7 @@ func (app *application) handleCreateButton(s sessions.Session) {
 		Config:  s.Config,
 	})
 
-	_, err := app.bot.SendMessage(s.UserID, app.createStatusMessage(s.Config, pos))
-	if err != nil {
-		app.serverError(s.UserID, err)
-	}
+	app.sendMessage(s.UserID, app.createStatusMessage(s.Config, pos))
 }
 
 func (app *application) showShapesMenuView(s sessions.Session) {

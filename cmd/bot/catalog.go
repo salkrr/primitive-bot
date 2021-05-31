@@ -40,98 +40,122 @@ func init() {
 
 var messageKeyToIndex = map[string]int{
 	"%d place in the queue.\n\nShapes: %s\nSteps: %d\nRepetitions: %d\nAlpha-channel: %d\nExtension: %s\nSize: %#v": 2,
-	"All":                               6,
-	"Alpha":                             20,
-	"Auto":                              23,
-	"Back":                              16,
-	"Bezier Curves":                     14,
-	"Circles":                           10,
-	"Create":                            15,
-	"Ellipses":                          11,
+	"All":                               11,
+	"Alpha":                             25,
+	"Auto":                              28,
+	"Back":                              21,
+	"Bezier Curves":                     19,
+	"Circles":                           15,
+	"Create":                            20,
+	"Ellipses":                          16,
 	"Enter number between %#v and %#v:": 3,
-	"Extension":                         21,
+	"Extension":                         26,
 	"Incorrect value!\nEnter number between %#v and %#v:": 4,
-	"Menu:":              25,
-	"Other":              24,
-	"Quadrilaterals":     13,
-	"Rectangles":         8,
-	"Repetitions":        19,
-	"Rotated Ellipses":   12,
-	"Rotated Rectangles": 9,
-	"Select a size for the larger side of the resulting image (the aspect ratio will be preserved):": 31,
-	"Select an alpha-channel value for the shapes:":                                                  29,
-	"Select an extension of the resulting image:":                                                    30,
-	"Select the number of shapes to draw in each step:":                                              28,
-	"Select the number of steps. Shapes will be drawn at each step:":                                 27,
-	"Select the shapes to be used to create the image:":                                              26,
-	"Send me some image.": 5,
-	"Shapes":              17,
-	"Size":                22,
+	"Menu:": 30,
+	"Other": 29,
+	"Please send me the picture as a 'Photo', not as a 'File'.": 5,
+	"Quadrilaterals":     18,
+	"Rectangles":         13,
+	"Repetitions":        24,
+	"Rotated Ellipses":   17,
+	"Rotated Rectangles": 14,
+	"Select a size for the larger side of the resulting image (the aspect ratio will be preserved):": 36,
+	"Select an alpha-channel value for the shapes:":                                                  34,
+	"Select an extension of the resulting image:":                                                    35,
+	"Select the number of shapes to draw in each step:":                                              33,
+	"Select the number of steps. Shapes will be drawn at each step:":                                 32,
+	"Select the shapes to be used to create the image:":                                              31,
+	"Send me some image.": 6,
+	"Shapes":              22,
+	"Size":                27,
 	"Something gone wrong! Please, try again in a few minutes.": 1,
-	"Steps":     18,
-	"Triangles": 7,
+	"Steps": 23,
+	"There aren't any operations in the queue.": 9,
+	"Triangles":             12,
+	"Unrecognized command.": 10,
 	"You can't add more operations to the queue.": 0,
+	"help message %d": 8,
+	"start message":   7,
 }
 
-var enIndex = []uint32{ // 33 elements
+var enIndex = []uint32{ // 38 elements
 	// Entry 0 - 1F
 	0x00000000, 0x0000002c, 0x00000066, 0x000000e2,
-	0x0000010a, 0x00000143, 0x00000157, 0x0000015b,
-	0x00000165, 0x00000170, 0x00000183, 0x0000018b,
-	0x00000194, 0x000001a5, 0x000001b4, 0x000001c2,
-	0x000001c9, 0x000001ce, 0x000001d5, 0x000001db,
-	0x000001e7, 0x000001ed, 0x000001f7, 0x000001fc,
-	0x00000201, 0x00000207, 0x0000020d, 0x0000023f,
-	0x0000027e, 0x000002b0, 0x000002de, 0x0000030a,
+	0x0000010a, 0x00000143, 0x0000017d, 0x00000191,
+	0x00000201, 0x00000330, 0x0000035a, 0x00000370,
+	0x00000374, 0x0000037e, 0x00000389, 0x0000039c,
+	0x000003a4, 0x000003ad, 0x000003be, 0x000003cd,
+	0x000003db, 0x000003e2, 0x000003e7, 0x000003ee,
+	0x000003f4, 0x00000400, 0x00000406, 0x00000410,
+	0x00000415, 0x0000041a, 0x00000420, 0x00000426,
 	// Entry 20 - 3F
-	0x00000369,
-} // Size: 156 bytes
+	0x00000458, 0x00000497, 0x000004c9, 0x000004f7,
+	0x00000523, 0x00000582,
+} // Size: 176 bytes
 
-const enData string = "" + // Size: 873 bytes
+const enData string = "" + // Size: 1410 bytes
 	"\x02You can't add more operations to the queue.\x02Something gone wrong!" +
 	" Please, try again in a few minutes.\x02%[1]d place in the queue.\x0a" +
 	"\x0aShapes: %[2]s\x0aSteps: %[3]d\x0aRepetitions: %[4]d\x0aAlpha-channel" +
 	": %[5]d\x0aExtension: %[6]s\x0aSize: %#[7]v\x02Enter number between %#[1" +
 	"]v and %#[2]v:\x02Incorrect value!\x0aEnter number between %#[1]v and %#" +
-	"[2]v:\x02Send me some image.\x02All\x02Triangles\x02Rectangles\x02Rotate" +
-	"d Rectangles\x02Circles\x02Ellipses\x02Rotated Ellipses\x02Quadrilateral" +
-	"s\x02Bezier Curves\x02Create\x02Back\x02Shapes\x02Steps\x02Repetitions" +
-	"\x02Alpha\x02Extension\x02Size\x02Auto\x02Other\x02Menu:\x02Select the s" +
-	"hapes to be used to create the image:\x02Select the number of steps. Sha" +
-	"pes will be drawn at each step:\x02Select the number of shapes to draw i" +
-	"n each step:\x02Select an alpha-channel value for the shapes:\x02Select " +
-	"an extension of the resulting image:\x02Select a size for the larger sid" +
-	"e of the resulting image (the aspect ratio will be preserved):"
+	"[2]v:\x02Please send me the picture as a 'Photo', not as a 'File'.\x02Se" +
+	"nd me some image.\x02Hey! This bot reproduces the images you send to it " +
+	"using geometric shapes. Please send an image to get started.\x02To get s" +
+	"tarted, send some image to the bot. After you are done with the configur" +
+	"ation and click the «Create» button, the operation will be added to the " +
+	"queue. The creation of a new image is not instantaneous - it takes some " +
+	"time. For this reason, each user can only add %[1]d operations to the qu" +
+	"eue.\x02There aren't any operations in the queue.\x02Unrecognized comman" +
+	"d.\x02All\x02Triangles\x02Rectangles\x02Rotated Rectangles\x02Circles" +
+	"\x02Ellipses\x02Rotated Ellipses\x02Quadrilaterals\x02Bezier Curves\x02C" +
+	"reate\x02Back\x02Shapes\x02Steps\x02Repetitions\x02Alpha\x02Extension" +
+	"\x02Size\x02Auto\x02Other\x02Menu:\x02Select the shapes to be used to cr" +
+	"eate the image:\x02Select the number of steps. Shapes will be drawn at e" +
+	"ach step:\x02Select the number of shapes to draw in each step:\x02Select" +
+	" an alpha-channel value for the shapes:\x02Select an extension of the re" +
+	"sulting image:\x02Select a size for the larger side of the resulting ima" +
+	"ge (the aspect ratio will be preserved):"
 
-var ruIndex = []uint32{ // 33 elements
+var ruIndex = []uint32{ // 38 elements
 	// Entry 0 - 1F
 	0x00000000, 0x00000059, 0x000000b9, 0x0000016e,
-	0x0000019d, 0x000001ef, 0x00000235, 0x0000023c,
-	0x00000255, 0x00000272, 0x000002a4, 0x000002af,
-	0x000002be, 0x000002e2, 0x00000303, 0x0000031b,
-	0x0000032a, 0x00000335, 0x00000342, 0x0000034b,
-	0x00000360, 0x0000036b, 0x00000380, 0x0000038f,
-	0x000003aa, 0x000003b7, 0x000003c1, 0x0000042e,
-	0x000004ad, 0x00000520, 0x00000569, 0x000005be,
+	0x0000019d, 0x000001ef, 0x00000260, 0x000002a6,
+	0x000003bc, 0x0000062e, 0x0000065b, 0x00000682,
+	0x00000689, 0x000006a2, 0x000006bf, 0x000006f1,
+	0x000006fc, 0x0000070b, 0x0000072f, 0x00000750,
+	0x00000768, 0x00000777, 0x00000782, 0x0000078f,
+	0x00000798, 0x000007ad, 0x000007b8, 0x000007cd,
+	0x000007dc, 0x000007f7, 0x00000804, 0x0000080e,
 	// Entry 20 - 3F
-	0x0000066d,
-} // Size: 156 bytes
+	0x0000087b, 0x000008fa, 0x0000096d, 0x000009b6,
+	0x00000a0b, 0x00000aba,
+} // Size: 176 bytes
 
-const ruData string = "" + // Size: 1645 bytes
+const ruData string = "" + // Size: 2746 bytes
 	"\x02Ты не можешь добавить больше операций в очередь.\x02Что-то пошло не " +
 	"так! Попробуй снова через пару минут.\x02%[1]d место в очереди.\x0a\x0a" +
 	"Фигуры: %[2]s\x0aШаги: %[3]d\x0aПовторения: %[4]d\x0aАльфа-канал: %[5]d" +
 	"\x0aРасширение: %[6]s\x0aРазмеры: %#[7]v\x02Введи число от %#[1]v до %#[" +
-	"2]v:\x02Неверное значение!\x0aВведи число от %#[1]v до %#[2]v:\x02Отправ" +
-	"ь мне какое-нибудь изображение.\x02Все\x02Треугольники\x02Прямоугольник" +
-	"и\x02Повёрнутые прямоугольники\x02Круги\x02Эллипсы\x02Повёрнутые эллипс" +
-	"ы\x02Четырёхугольники\x02Кривые Безье\x02Создать\x02Назад\x02Фигуры\x02" +
-	"Шаги\x02Повторения\x02Альфа\x02Расширение\x02Размеры\x02Автоматически" +
-	"\x02Другое\x02Меню:\x02Выбери фигуры, из которых будет выстраиваться изо" +
-	"бражение:\x02Выбери количество шагов. На каждом шаге будут отрисовывать" +
-	"ся фигуры:\x02Выбери сколько фигур будет отрисовываться на каждой итера" +
-	"ции:\x02Выбери значение альфа-канала для фигур:\x02Выбери расширение по" +
-	"лучившегося изображения:\x02Выбери размер большей стороны получившегося" +
-	" изображения (соотношение сторон будет сохранено):"
+	"2]v:\x02Неверное значение!\x0aВведи число от %#[1]v до %#[2]v:\x02Пожайл" +
+	"уста, отправь мне изображение как 'Фото', а не как 'Файл'.\x02Отправь м" +
+	"не какое-нибудь изображение.\x02Привет! Этот бот воспроизводит переданн" +
+	"ое ему изображение, используя различные геометрические фигуры. Чтобы на" +
+	"чать, отправь какое-нибудь изображение.\x02Для того, чтобы начать, отпр" +
+	"авь боту какое-нибудь изображение. После того, как ты закончишь с конфи" +
+	"гурацией и нажмёшь кнопку «Создать», операция будет добавлена в очередь" +
+	". Создание нового изображения не происходит мгновенно - процесс занимает" +
+	" некоторое время. По этой причине каждый пользователь может добавить тол" +
+	"ько %[1]d операций в очередь.\x02Нету операций в очереди.\x02Неизвестна" +
+	"я команда.\x02Все\x02Треугольники\x02Прямоугольники\x02Повёрнутые прямо" +
+	"угольники\x02Круги\x02Эллипсы\x02Повёрнутые эллипсы\x02Четырёхугольники" +
+	"\x02Кривые Безье\x02Создать\x02Назад\x02Фигуры\x02Шаги\x02Повторения\x02" +
+	"Альфа\x02Расширение\x02Размеры\x02Автоматически\x02Другое\x02Меню:\x02В" +
+	"ыбери фигуры, из которых будет выстраиваться изображение:\x02Выбери кол" +
+	"ичество шагов. На каждом шаге будут отрисовываться фигуры:\x02Выбери ск" +
+	"олько фигур будет отрисовываться на каждой итерации:\x02Выбери значение" +
+	" альфа-канала для фигур:\x02Выбери расширение получившегося изображения:" +
+	"\x02Выбери размер большей стороны получившегося изображения (соотношение" +
+	" сторон будет сохранено):"
 
-	// Total table size 2830 bytes (2KiB); checksum: E19234CB
+	// Total table size 4508 bytes (4KiB); checksum: DAD5BBCF

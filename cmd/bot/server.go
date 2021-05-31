@@ -3,11 +3,19 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/lazy-void/primitive-bot/pkg/menu"
 	"github.com/lazy-void/primitive-bot/pkg/sessions"
 	"github.com/lazy-void/primitive-bot/pkg/tg"
+)
+
+const (
+	enqueuedLogMessage = "Enqueued: user id %d | input %s | iterations=%d, shape=%d, alpha=%d, repeat=%d, resolution=%d, extension=%s"
+	creatingLogMessage = "Creating: user id %d | input %s | output %s | iterations=%d, shape=%d, alpha=%d, repeat=%d, resolution=%d, extension=%s"
+	finishedLogMessage = "Finished: user id %d | input %s | output %s | %.1f seconds"
+	sentLogMessage     = "Sent: user id %d | output %s"
 )
 
 func (app *application) listenAndServe() {
@@ -82,8 +90,16 @@ func (app *application) worker() {
 }
 
 func (app *application) processMessage(m tg.Message) {
-	if m.Photo != nil {
+	switch {
+	case m.Photo != nil:
 		app.processPhoto(m)
+		return
+	case m.Document.FileID != "":
+		app.sendMessage(m.Chat.ID,
+			app.printer.Sprintf("Please send me the picture as a 'Photo', not as a 'File'."))
+		return
+	case strings.HasPrefix(m.Text, "/"):
+		app.processCommand(m)
 		return
 	}
 
@@ -94,33 +110,8 @@ func (app *application) processMessage(m tg.Message) {
 		return
 	}
 
-	if m.Text == "/status" {
-		operations, positions := app.queue.GetOperations(m.From.ID)
-		if len(operations) == 0 {
-			_, err := app.bot.SendMessage(m.Chat.ID,
-				app.printer.Sprint("There aren't any operations in the queue."))
-			if err != nil {
-				app.serverError(m.Chat.ID, err)
-			}
-			return
-		}
-
-		for i, op := range operations {
-			_, err := app.bot.SendMessage(m.Chat.ID, app.createStatusMessage(op.Config, positions[i]))
-			if err != nil {
-				app.serverError(m.Chat.ID, err)
-				return
-			}
-		}
-		return
-	}
-
 	// Send help message
-	_, err := app.bot.SendMessage(m.Chat.ID,
-		app.printer.Sprintf("Send me some image."))
-	if err != nil {
-		app.serverError(m.Chat.ID, err)
-	}
+	app.sendMessage(m.Chat.ID, app.printer.Sprintf("Send me some image."))
 }
 
 func (app *application) processPhoto(m tg.Message) {
@@ -176,6 +167,27 @@ func (app *application) downloadPhoto(photos []tg.PhotoSize) (string, error) {
 	}
 
 	return path, nil
+}
+
+func (app *application) processCommand(m tg.Message) {
+	switch m.Text {
+	case "/start":
+		app.sendMessage(m.Chat.ID, app.printer.Sprintf("start message"))
+	case "/help":
+		app.sendMessage(m.Chat.ID, app.printer.Sprintf("help message %d", app.operationsLimit))
+	case "/status":
+		operations, positions := app.queue.GetOperations(m.From.ID)
+		if len(operations) == 0 {
+			app.sendMessage(m.Chat.ID, app.printer.Sprintf("There aren't any operations in the queue."))
+			return
+		}
+
+		for i, op := range operations {
+			app.sendMessage(m.Chat.ID, app.createStatusMessage(op.Config, positions[i]))
+		}
+	default:
+		app.sendMessage(m.Chat.ID, app.printer.Sprintf("Unrecognized command."))
+	}
 }
 
 func (app *application) processCallbackQuery(q tg.CallbackQuery) {

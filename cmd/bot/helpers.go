@@ -109,6 +109,13 @@ func (app *application) showMenuView(
 	}
 }
 
+func (app *application) sendMessage(chatID int64, message string) {
+	_, err := app.bot.SendMessage(chatID, message)
+	if err != nil {
+		app.serverError(chatID, err)
+	}
+}
+
 // match reports whether path matches ^pattern$, and if it matches,
 // assigns any capture groups to the *string or *int vars.
 func match(path, pattern string, vars ...interface{}) bool {

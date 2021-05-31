@@ -121,9 +121,44 @@
             ]
         },
         {
+            "id": "Please send me the picture as a 'Photo', not as a 'File'.",
+            "message": "Please send me the picture as a 'Photo', not as a 'File'.",
+            "translation": "Please send me the picture as a 'Photo', not as a 'File'."
+        },
+        {
             "id": "Send me some image.",
             "message": "Send me some image.",
             "translation": "Send me some image."
+        },
+        {
+            "id": "start message",
+            "message": "start message",
+            "translation": "Hey! This bot reproduces the images you send to it using geometric shapes. Please send an image to get started."
+        },
+        {
+            "id": "help message {OperationsLimit}",
+            "message": "help message {OperationsLimit}",
+            "translation": "To get started, send some image to the bot. After you are done with the configuration and click the «Create» button, the operation will be added to the queue. The creation of a new image is not instantaneous - it takes some time. For this reason, each user can only add {OperationsLimit} operations to the queue.",
+            "placeholders": [
+                {
+                    "id": "OperationsLimit",
+                    "string": "%[1]d",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 1,
+                    "expr": "app.operationsLimit"
+                }
+            ]
+        },
+        {
+            "id": "There aren't any operations in the queue.",
+            "message": "There aren't any operations in the queue.",
+            "translation": "There aren't any operations in the queue."
+        },
+        {
+            "id": "Unrecognized command.",
+            "message": "Unrecognized command.",
+            "translation": "Unrecognized command."
         },
         {
             "id": "All",

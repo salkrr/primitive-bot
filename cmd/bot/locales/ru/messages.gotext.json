@@ -81,7 +81,7 @@
             "placeholders": [
                 {
                     "id": "Min",
-                    "string": "%[1]d",
+                    "string": "%#[1]v",
                     "type": "int",
                     "underlyingType": "int",
                     "argNum": 1,
@@ -89,7 +89,7 @@
                 },
                 {
                     "id": "Max",
-                    "string": "%[2]d",
+                    "string": "%#[2]v",
                     "type": "int",
                     "underlyingType": "int",
                     "argNum": 2,
@@ -104,7 +104,7 @@
             "placeholders": [
                 {
                     "id": "Min",
-                    "string": "%[1]d",
+                    "string": "%#[1]v",
                     "type": "int",
                     "underlyingType": "int",
                     "argNum": 1,
@@ -112,11 +112,41 @@
                 },
                 {
                     "id": "Max",
-                    "string": "%[2]d",
+                    "string": "%#[2]v",
                     "type": "int",
                     "underlyingType": "int",
                     "argNum": 2,
                     "expr": "max"
+                }
+            ]
+        },
+        {
+            "id": "Please send me the picture as a 'Photo', not as a 'File'.",
+            "message": "Please send me the picture as a 'Photo', not as a 'File'.",
+            "translation": "Пожайлуста, отправь мне изображение как 'Фото', а не как 'Файл'."
+        },
+        {
+            "id": "Send me some image.",
+            "message": "Send me some image.",
+            "translation": "Отправь мне какое-нибудь изображение."
+        },
+        {
+            "id": "start message",
+            "message": "start message",
+            "translation": "Привет! Этот бот воспроизводит переданное ему изображение, используя различные геометрические фигуры. Чтобы начать, отправь какое-нибудь изображение."
+        },
+        {
+            "id": "help message {OperationsLimit}",
+            "message": "help message {OperationsLimit}",
+            "translation": "Для того, чтобы начать, отправь боту какое-нибудь изображение. После того, как ты закончишь с конфигурацией и нажмёшь кнопку «Создать», операция будет добавлена в очередь. Создание нового изображения не происходит мгновенно - процесс занимает некоторое время. По этой причине каждый пользователь может добавить только {OperationsLimit} операций в очередь.",
+            "placeholders": [
+                {
+                    "id": "OperationsLimit",
+                    "string": "%[1]d",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 1,
+                    "expr": "app.operationsLimit"
                 }
             ]
         },
@@ -126,9 +156,9 @@
             "translation": "Нету операций в очереди."
         },
         {
-            "id": "Send me some image.",
-            "message": "Send me some image.",
-            "translation": "Отправь мне какое-нибудь изображение."
+            "id": "Unrecognized command.",
+            "message": "Unrecognized command.",
+            "translation": "Неизвестная команда."
         },
         {
             "id": "All",
