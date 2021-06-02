@@ -58,15 +58,20 @@ type application struct {
 
 func init() {
 	flag.StringVar(&token, "token", "", "The token for the Telegram Bot.")
-	flag.StringVar(&inDir, "i", "inputs", "Name of the directory where inputs will be stored.")
-	flag.StringVar(&outDir, "o", "outputs", "Name of the directory where outputs will be stored.")
-	flag.StringVar(&logPath, "log", "", "Path to the previous log file. It is used to restore queue.")
-	flag.IntVar(&workers, "w", runtime.NumCPU(), "Numbers of parallel workers used to create primitive image.")
-	flag.IntVar(&operationsLimit, "limit", 5, "The number of operations that the user can add to the queue.")
-	flag.IntVar(&maxIter, "iter", 2000, "Maximum iterations that user can specify.")
-	flag.IntVar(&maxSize, "size", 3840, "Maximum image size that user can specify.")
+	flag.StringVar(&inDir, "i", "inputs",
+		"Path to the directory where user-supplied images are stored.")
+	flag.StringVar(&outDir, "o", "outputs",
+		"Path to the directory where resulting images are stored.")
+	flag.StringVar(&logPath, "log", "",
+		"Path to the previous log file. It is used to restore queue.")
+	flag.IntVar(&workers, "w", runtime.NumCPU(),
+		"The number of parallel workers used to create a primitive image.")
+	flag.IntVar(&operationsLimit, "limit", 5,
+		"The number of operations that the user can add to the queue.")
+	flag.IntVar(&maxIter, "steps", 2000, "The max value of steps that the user can specify.")
+	flag.IntVar(&maxSize, "size", 3840, "The max value of image size that the user can specify.")
 	flag.DurationVar(&timeout, "timeout", 30*time.Minute,
-		"The number of minutes that a session can be inactive before it's terminated.")
+		"The period of time that a session can be inactive before it's terminated.")
 	flag.Func("lang", `Language of the bot (en, ru). (default "en")`, func(s string) error {
 		if s != "en" && s != "ru" {
 			return errors.New("incorrect language")
@@ -96,7 +101,7 @@ func main() {
 		}
 	}
 
-	// create directories for input and output
+	// create directories for the inputs and the outputs
 	if err := os.MkdirAll(inDir, 0664); err != nil {
 		log.Fatal(err)
 	}
