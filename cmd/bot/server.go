@@ -202,7 +202,7 @@ func (app *application) processCallbackQuery(q tg.CallbackQuery) {
 	if !ok || q.Message.MessageID != s.MenuMessageID {
 		err := app.bot.DeleteMessage(q.Message.Chat.ID, q.Message.MessageID)
 		if err != nil {
-			app.errorLog.Printf("Deleting message error: %s", err)
+			app.errorLog.Printf("Error deleting message: %s", err)
 		}
 		return
 	}
@@ -213,7 +213,7 @@ func (app *application) processCallbackQuery(q tg.CallbackQuery) {
 	case match(q.Data, menu.RootViewCallback):
 		app.showRootMenuView(s)
 	case match(q.Data, menu.CreateButtonCallback):
-		app.handleCreateButton(s)
+		app.handleCreateButton(s, q.ID)
 	case match(q.Data, menu.ShapesViewCallback):
 		app.showShapesMenuView(s)
 	case match(q.Data, menu.ShapesButtonCallback, &num):

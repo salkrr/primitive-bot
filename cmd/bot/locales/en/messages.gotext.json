@@ -7,6 +7,21 @@
             "translation": "You can't add more operations to the queue."
         },
         {
+            "id": "Added to the queue. Position: {Pos}.",
+            "message": "Added to the queue. Position: {Pos}.",
+            "translation": "Added to the queue. Position: {Pos}.",
+            "placeholders": [
+                {
+                    "id": "Pos",
+                    "string": "%[1]d",
+                    "type": "int",
+                    "underlyingType": "int",
+                    "argNum": 1,
+                    "expr": "pos"
+                }
+            ]
+        },
+        {
             "id": "Something gone wrong! Please, try again in a few minutes.",
             "message": "Something gone wrong! Please, try again in a few minutes.",
             "translation": "Something gone wrong! Please, try again in a few minutes."
