@@ -67,7 +67,7 @@ func TestNewActiveSessionsStartsTimeouterThatTerminatesInactiveSessions(t *testi
 	as := NewActiveSessions(timeout, frequency)
 
 	// add session
-	as.Set(userID, session)
+	as.Set(userID, session, false)
 
 	// wait
 	time.Sleep(timeout + frequency)
@@ -88,7 +88,7 @@ func TestNewActiveSessionsStartsTimeouterThatDoesNotTerminateActiveSessions(t *t
 	as := NewActiveSessions(timeout, frequency)
 
 	// add session
-	as.Set(userID, session)
+	as.Set(userID, session, false)
 
 	// wait
 	time.Sleep(timeout / 2)
@@ -116,7 +116,7 @@ func TestNewActiveSessionsWhenTerminatedSessionIsInInputMenuState(t *testing.T) 
 	as := NewActiveSessions(timeout, frequency)
 
 	// add session
-	as.Set(userID, session)
+	as.Set(userID, session, false)
 
 	// wait for signal from quit channel
 	after := time.After(100 * timeout)
@@ -141,7 +141,7 @@ func TestTimeouterWhenTerminatedSessionIsInInputMenuStateButNobodyListensMustPan
 	}
 
 	// add session
-	as.Set(userID, session)
+	as.Set(userID, session, false)
 
 	out := make(chan bool)
 	after := time.After(100 * timeout)
@@ -168,7 +168,7 @@ func TestActiveSessions_Set(t *testing.T) {
 	as := NewActiveSessions(timeout, frequency)
 
 	// add session
-	as.Set(userID, session)
+	as.Set(userID, session, false)
 
 	s, ok := as.sessions[userID]
 	if !ok {
@@ -179,7 +179,7 @@ func TestActiveSessions_Set(t *testing.T) {
 
 	// update session
 	session.Config.Shape = primitive.ShapeEllipse
-	as.Set(userID, session)
+	as.Set(userID, session, false)
 
 	s, ok = as.sessions[userID]
 	if !ok {
@@ -204,7 +204,7 @@ func TestActiveSessions_Get(t *testing.T) {
 	}
 
 	// add session
-	as.Set(userID, session)
+	as.Set(userID, session, false)
 
 	s, ok := as.Get(userID)
 	if !ok {

@@ -71,10 +71,28 @@ func NewActiveSessions(timeout time.Duration, frequency time.Duration) *ActiveSe
 	return as
 }
 
-// Set adds new or replaces existing session.
-func (as *ActiveSessions) Set(userID int64, s Session) {
+// Set adds new or replaces existing session. The last boolean parameter
+// specifies if it is a completely new session (with new image) or same
+// session that just need to be updated. This is needed to avoid the memory
+// leaks from the goroutines that may be waiting for the user input.
+func (as *ActiveSessions) Set(userID int64, s Session, isNew bool) {
 	as.mu.Lock()
 	defer as.mu.Unlock()
+
+	// Delete current session and exit goroutine
+	// that waits for the user input.
+	if curr, ok := as.sessions[userID]; ok && isNew {
+		if curr.State == InInputDialog {
+			select {
+			case curr.QuitInput <- 1:
+				break
+			default:
+				panic("nobody listens on the QuitInput channel")
+			}
+		}
+
+		delete(as.sessions, curr.UserID)
+	}
 
 	as.sessions[userID] = s
 }
@@ -112,6 +130,7 @@ func (as *ActiveSessions) timeouter(d time.Duration) {
 					case s.QuitInput <- 1:
 						break
 					default:
+						as.mu.Unlock()
 						panic("nobody listens on the QuitInput channel")
 					}
 				}

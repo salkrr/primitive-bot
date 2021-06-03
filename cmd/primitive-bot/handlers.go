@@ -46,12 +46,12 @@ func (app *application) showShapesMenuView(s sessions.Session) {
 
 func (app *application) handleShapesButton(s sessions.Session, n int) {
 	s.Config.Shape = primitive.Shape(n)
-	app.sessions.Set(s.UserID, s)
+	app.sessions.Set(s.UserID, s, false)
 
 	// update menu
 	selected := fmt.Sprintf("%s/%d", menu.ShapesViewCallback, s.Config.Shape)
 	s.Menu.ShapesView = menu.NewMenuView(menu.ShapesViewTmpl, selected)
-	app.sessions.Set(s.UserID, s)
+	app.sessions.Set(s.UserID, s, false)
 
 	app.showMenuView(s.UserID, s.MenuMessageID, s.Menu.ShapesView)
 }
@@ -65,12 +65,12 @@ func (app *application) handleIterButton(s sessions.Session, n int) {
 		return
 	}
 	s.Config.Iterations = n
-	app.sessions.Set(s.UserID, s)
+	app.sessions.Set(s.UserID, s, false)
 
 	// update menu
 	selected := fmt.Sprintf("%s/%d", menu.IterViewCallback, s.Config.Iterations)
 	s.Menu.IterView = menu.NewMenuView(menu.IterViewTmpl, selected)
-	app.sessions.Set(s.UserID, s)
+	app.sessions.Set(s.UserID, s, false)
 
 	app.showMenuView(s.UserID, s.MenuMessageID, s.Menu.IterView)
 }
@@ -86,13 +86,13 @@ func (app *application) handleIterInput(s sessions.Session) {
 	}
 
 	s.Config.Iterations = num
-	app.sessions.Set(s.UserID, s)
+	app.sessions.Set(s.UserID, s, false)
 
 	buttonText := fmt.Sprintf("%s (%d)", menu.OtherButtonText, s.Config.Iterations)
 	s.Menu.IterView = menu.NewMenuView(
 		menu.IterViewTmpl, menu.IterInputCallback, buttonText,
 	)
-	app.sessions.Set(s.UserID, s)
+	app.sessions.Set(s.UserID, s, false)
 
 	app.showMenuView(s.UserID, s.MenuMessageID, s.Menu.IterView)
 }
@@ -103,12 +103,12 @@ func (app *application) showRepMenuView(s sessions.Session) {
 
 func (app *application) handleRepButton(s sessions.Session, n int) {
 	s.Config.Repeat = n
-	app.sessions.Set(s.UserID, s)
+	app.sessions.Set(s.UserID, s, false)
 
 	// update menu
 	selected := fmt.Sprintf("%s/%d", menu.RepViewCallback, s.Config.Repeat)
 	s.Menu.RepView = menu.NewMenuView(menu.RepViewTmpl, selected)
-	app.sessions.Set(s.UserID, s)
+	app.sessions.Set(s.UserID, s, false)
 
 	app.showMenuView(s.UserID, s.MenuMessageID, s.Menu.RepView)
 }
@@ -124,12 +124,12 @@ func (app *application) handleAlphaButton(s sessions.Session, n int) {
 		return
 	}
 	s.Config.Alpha = n
-	app.sessions.Set(s.UserID, s)
+	app.sessions.Set(s.UserID, s, false)
 
 	// update menu
 	selected := fmt.Sprintf("%s/%d", menu.AlphaViewCallback, s.Config.Alpha)
 	s.Menu.AlphaView = menu.NewMenuView(menu.AlphaViewTmpl, selected)
-	app.sessions.Set(s.UserID, s)
+	app.sessions.Set(s.UserID, s, false)
 
 	app.showMenuView(s.UserID, s.MenuMessageID, s.Menu.AlphaView)
 }
@@ -145,13 +145,13 @@ func (app *application) handleAlphaInput(s sessions.Session) {
 	}
 
 	s.Config.Alpha = num
-	app.sessions.Set(s.UserID, s)
+	app.sessions.Set(s.UserID, s, false)
 
 	buttonText := fmt.Sprintf("%s (%d)", menu.OtherButtonText, s.Config.Alpha)
 	s.Menu.AlphaView = menu.NewMenuView(
 		menu.AlphaViewTmpl, menu.AlphaInputCallback, buttonText,
 	)
-	app.sessions.Set(s.UserID, s)
+	app.sessions.Set(s.UserID, s, false)
 
 	app.showMenuView(s.UserID, s.MenuMessageID, s.Menu.AlphaView)
 }
@@ -162,12 +162,12 @@ func (app *application) showExtMenuView(s sessions.Session) {
 
 func (app *application) handleExtButton(s sessions.Session, ext string) {
 	s.Config.Extension = ext
-	app.sessions.Set(s.UserID, s)
+	app.sessions.Set(s.UserID, s, false)
 
 	// update menu
 	selected := fmt.Sprintf("%s/%s", menu.ExtViewCallback, s.Config.Extension)
 	s.Menu.ExtView = menu.NewMenuView(menu.ExtViewTmpl, selected)
-	app.sessions.Set(s.UserID, s)
+	app.sessions.Set(s.UserID, s, false)
 
 	app.showMenuView(s.UserID, s.MenuMessageID, s.Menu.ExtView)
 }
@@ -181,12 +181,12 @@ func (app *application) handleSizeButton(s sessions.Session, n int) {
 		return
 	}
 	s.Config.OutputSize = n
-	app.sessions.Set(s.UserID, s)
+	app.sessions.Set(s.UserID, s, false)
 
 	// update menu
 	selected := fmt.Sprintf("%s/%d", menu.SizeViewCallback, s.Config.OutputSize)
 	s.Menu.SizeView = menu.NewMenuView(menu.SizeViewTmpl, selected)
-	app.sessions.Set(s.UserID, s)
+	app.sessions.Set(s.UserID, s, false)
 
 	app.showMenuView(s.UserID, s.MenuMessageID, s.Menu.SizeView)
 }
@@ -202,13 +202,13 @@ func (app *application) handleSizeInput(s sessions.Session) {
 	}
 
 	s.Config.OutputSize = num
-	app.sessions.Set(s.UserID, s)
+	app.sessions.Set(s.UserID, s, false)
 
 	buttonText := fmt.Sprintf("%s (%d)", menu.OtherButtonText, s.Config.OutputSize)
 	s.Menu.SizeView = menu.NewMenuView(
 		menu.SizeViewTmpl, menu.SizeInputCallback, buttonText,
 	)
-	app.sessions.Set(s.UserID, s)
+	app.sessions.Set(s.UserID, s, false)
 
 	app.showMenuView(s.UserID, s.MenuMessageID, s.Menu.SizeView)
 }

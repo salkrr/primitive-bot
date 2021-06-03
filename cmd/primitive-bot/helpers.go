@@ -47,7 +47,7 @@ func (app *application) getInputFromUser(
 	defer close(out)
 
 	s.State = sessions.InInputDialog
-	app.sessions.Set(s.UserID, s)
+	app.sessions.Set(s.UserID, s, false)
 
 	err := app.bot.EditMessageText(s.UserID, s.MenuMessageID,
 		app.printer.Sprintf("Enter number between %#v and %#v:", min, max))
