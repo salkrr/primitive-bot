@@ -3,4 +3,4 @@
 .env
 inputs
 outputs
-builds
+dist/
