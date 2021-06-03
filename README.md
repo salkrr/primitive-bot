@@ -60,5 +60,5 @@ Full list of options:
   -token string
         The token for the Telegram Bot.
   -w int
-        The number of parallel workers used to create a primitive image. (default to number of CPUs)
+        The number of parallel workers used to create a primitive image. (defaults to number of CPUs)
 ```
