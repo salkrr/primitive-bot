@@ -1,7 +1,8 @@
 package sessions
 
 import (
-	"fmt"
+	"bytes"
+	"log"
 	"reflect"
 	"testing"
 	"time"
@@ -12,21 +13,6 @@ import (
 	"github.com/lazy-void/primitive-bot/pkg/menu"
 	"github.com/lazy-void/primitive-bot/pkg/primitive"
 )
-
-func didPanic(f func()) bool {
-	didPanic := false
-	func() {
-		defer func() {
-			if msg := recover(); msg != nil {
-				didPanic = true
-			}
-		}()
-
-		f()
-	}()
-
-	return didPanic
-}
 
 func TestNewSession(t *testing.T) {
 	var userID, menuMessageID int64 = 123456789, 987654321
@@ -64,7 +50,7 @@ func TestNewActiveSessionsStartsTimeouterThatTerminatesInactiveSessions(t *testi
 	session := NewSession(userID, 123, "img.png", 1)
 
 	// create
-	as := NewActiveSessions(timeout, frequency)
+	as := NewActiveSessions(timeout, frequency, nil)
 
 	// add session
 	as.Set(userID, session, false)
@@ -85,7 +71,7 @@ func TestNewActiveSessionsStartsTimeouterThatDoesNotTerminateActiveSessions(t *t
 	session := NewSession(userID, 123, "img.png", 1)
 
 	// create
-	as := NewActiveSessions(timeout, frequency)
+	as := NewActiveSessions(timeout, frequency, nil)
 
 	// add session
 	as.Set(userID, session, false)
@@ -113,7 +99,7 @@ func TestNewActiveSessionsWhenTerminatedSessionIsInInputMenuState(t *testing.T) 
 	session.State = InInputDialog
 
 	// create
-	as := NewActiveSessions(timeout, frequency)
+	as := NewActiveSessions(timeout, frequency, nil)
 
 	// add session
 	as.Set(userID, session, false)
@@ -127,35 +113,27 @@ func TestNewActiveSessionsWhenTerminatedSessionIsInInputMenuState(t *testing.T) 
 	}
 }
 
-func TestTimeouterWhenTerminatedSessionIsInInputMenuStateButNobodyListensMustPanic(t *testing.T) {
+func TestTimeouterWhenTerminatedSessionIsInInputMenuStateButNobodyListensQuitChannelLogsAnError(t *testing.T) {
 	timeout := time.Millisecond
 	frequency := time.Millisecond
 	var userID int64 = 123456789
 	session := NewSession(userID, 123, "img.png", 1)
 	session.State = InInputDialog
+	expected := "nobody listens on the QuitInput channel\n"
 
-	// create
+	// create and add session
 	as := &ActiveSessions{
 		sessions: make(map[int64]Session),
 		timeout:  timeout,
 	}
-
-	// add session
 	as.Set(userID, session, false)
 
-	out := make(chan bool)
-	after := time.After(100 * timeout)
-	go func(out chan<- bool) {
-		out <- !didPanic(func() { as.timeouter(frequency) })
-	}(out)
+	logOut := &bytes.Buffer{}
+	go as.timeouter(frequency, log.New(logOut, "", 0))
+	time.Sleep(frequency * 10)
 
-	select {
-	case panicked := <-out:
-		if !panicked {
-			fmt.Println("timeouter func should panic")
-		}
-	case <-after:
-		t.Error("signal on quit channel was not sent")
+	if logOut.String() != expected {
+		t.Errorf("got log message: %q; want %q", logOut.String(), expected)
 	}
 }
 
@@ -165,7 +143,7 @@ func TestActiveSessions_Set(t *testing.T) {
 	var userID int64 = 123456789
 	session := NewSession(userID, 123, "img.png", 1)
 
-	as := NewActiveSessions(timeout, frequency)
+	as := NewActiveSessions(timeout, frequency, nil)
 
 	// add session
 	as.Set(userID, session, false)
@@ -195,7 +173,7 @@ func TestActiveSessions_Get(t *testing.T) {
 	var userID int64 = 123456789
 	session := NewSession(userID, 123, "img.png", 1)
 
-	as := NewActiveSessions(timeout, frequency)
+	as := NewActiveSessions(timeout, frequency, nil)
 
 	// when session is not in the active session
 	_, ok := as.Get(userID)

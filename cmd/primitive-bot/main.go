@@ -127,7 +127,7 @@ func main() {
 		maxSize:         maxSize,
 		workers:         workers,
 		bot:             &tg.Bot{Token: token},
-		sessions:        sessions.NewActiveSessions(timeout, 5*time.Minute),
+		sessions:        sessions.NewActiveSessions(timeout, 5*time.Minute, errorLog),
 		queue:           q,
 	}
 

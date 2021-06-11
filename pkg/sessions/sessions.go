@@ -5,6 +5,8 @@ import (
 	"sync"
 	"time"
 
+	"log"
+
 	"github.com/lazy-void/primitive-bot/pkg/menu"
 
 	"github.com/lazy-void/primitive-bot/pkg/primitive"
@@ -60,13 +62,14 @@ type ActiveSessions struct {
 // NewActiveSessions initializes new instance of ActiveSessions object.
 // The argument 'timeout' specifies the maximum amount of time that a session
 // can be inactive before it is terminated. The argument 'frequency' specifies
-// how often the search for inactive sessions occurs.
-func NewActiveSessions(timeout time.Duration, frequency time.Duration) *ActiveSessions {
+// how often the search for inactive sessions occurs. 'errorLog' argument is used to
+// log error messages that may occur during session termination.
+func NewActiveSessions(timeout time.Duration, frequency time.Duration, errorLog *log.Logger) *ActiveSessions {
 	as := &ActiveSessions{
 		sessions: make(map[int64]Session),
 		timeout:  timeout,
 	}
-	go as.timeouter(frequency)
+	go as.timeouter(frequency, errorLog)
 
 	return as
 }
@@ -117,7 +120,7 @@ func (as *ActiveSessions) Get(userID int64) (Session, bool) {
 
 // timeouter terminates inactive sessions. The duration
 // argument specifies interval between each search.
-func (as *ActiveSessions) timeouter(d time.Duration) {
+func (as *ActiveSessions) timeouter(d time.Duration, l *log.Logger) {
 	ticker := time.NewTicker(d)
 	for {
 		<-ticker.C
@@ -130,8 +133,7 @@ func (as *ActiveSessions) timeouter(d time.Duration) {
 					case s.QuitInput <- 1:
 						break
 					default:
-						as.mu.Unlock()
-						panic("nobody listens on the QuitInput channel")
+						l.Println("nobody listens on the QuitInput channel")
 					}
 				}
 
