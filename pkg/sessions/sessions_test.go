@@ -1,9 +1,9 @@
 package sessions
 
 import (
-	"bytes"
 	"log"
 	"reflect"
+	"sync"
 	"testing"
 	"time"
 
@@ -13,6 +13,26 @@ import (
 	"github.com/lazy-void/primitive-bot/pkg/menu"
 	"github.com/lazy-void/primitive-bot/pkg/primitive"
 )
+
+type out struct {
+	sync.Mutex
+	data string
+}
+
+func (o *out) Write(p []byte) (n int, err error) {
+	o.Lock()
+	defer o.Unlock()
+
+	o.data = string(p)
+	return len(p), nil
+}
+
+func (o *out) Read() string {
+	o.Lock()
+	defer o.Unlock()
+
+	return o.data
+}
 
 func TestNewSession(t *testing.T) {
 	var userID, menuMessageID int64 = 123456789, 987654321
@@ -128,12 +148,13 @@ func TestTimeouterWhenTerminatedSessionIsInInputMenuStateButNobodyListensQuitCha
 	}
 	as.Set(userID, session, false)
 
-	logOut := &bytes.Buffer{}
+	logOut := &out{}
 	go as.timeouter(frequency, log.New(logOut, "", 0))
 	time.Sleep(frequency * 10)
 
-	if logOut.String() != expected {
-		t.Errorf("got log message: %q; want %q", logOut.String(), expected)
+	res := logOut.Read()
+	if res != expected {
+		t.Errorf("got log message: %q; want %q", res, expected)
 	}
 }
 
