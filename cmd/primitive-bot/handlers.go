@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/lazy-void/primitive-bot/pkg/primitive"
@@ -76,12 +77,12 @@ func (app *application) handleIterButton(s sessions.Session, n int) {
 }
 
 func (app *application) handleIterInput(s sessions.Session) {
-	ch := make(chan int)
-	go app.getInputFromUser(s, 1, app.maxIter, ch)
-
-	num, ok := <-ch
-	if !ok {
-		// If input menu was closed
+	num, err := app.getInputFromUser(s, 1, app.maxIter)
+	if errors.Is(err, errSessionTerminated) {
+		// If the input menu was closed
+		return
+	} else if err != nil {
+		app.serverError(s.UserID, err)
 		return
 	}
 
@@ -135,12 +136,12 @@ func (app *application) handleAlphaButton(s sessions.Session, n int) {
 }
 
 func (app *application) handleAlphaInput(s sessions.Session) {
-	ch := make(chan int)
-	go app.getInputFromUser(s, 1, 255, ch)
-
-	num, ok := <-ch
-	if !ok {
-		// If input menu was closed
+	num, err := app.getInputFromUser(s, 1, 255)
+	if errors.Is(err, errSessionTerminated) {
+		// If the input menu was closed
+		return
+	} else if err != nil {
+		app.serverError(s.UserID, err)
 		return
 	}
 
@@ -192,12 +193,12 @@ func (app *application) handleSizeButton(s sessions.Session, n int) {
 }
 
 func (app *application) handleSizeInput(s sessions.Session) {
-	ch := make(chan int)
-	go app.getInputFromUser(s, 256, app.maxSize, ch)
-
-	num, ok := <-ch
-	if !ok {
+	num, err := app.getInputFromUser(s, 256, app.maxSize)
+	if errors.Is(err, errSessionTerminated) {
 		// If the input menu was closed
+		return
+	} else if err != nil {
+		app.serverError(s.UserID, err)
 		return
 	}
 

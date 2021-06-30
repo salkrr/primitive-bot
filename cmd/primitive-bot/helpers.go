@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 	"runtime/debug"
@@ -8,12 +9,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/lazy-void/primitive-bot/pkg/sessions"
-
 	"github.com/lazy-void/primitive-bot/pkg/menu"
-
 	"github.com/lazy-void/primitive-bot/pkg/primitive"
+	"github.com/lazy-void/primitive-bot/pkg/sessions"
 )
+
+var errSessionTerminated = errors.New("session terminated")
 
 func (app *application) serverError(chatID int64, err error) {
 	trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
@@ -40,20 +41,14 @@ func (app *application) createStatusMessage(c primitive.Config, position int) st
 func (app *application) getInputFromUser(
 	s sessions.Session,
 	min, max int,
-	out chan<- int,
-) {
-	// We need to communicate that input menu was closed
-	// in case of server error or if session was terminated
-	defer close(out)
-
+) (int, error) {
 	s.State = sessions.InInputDialog
 	app.sessions.Set(s.UserID, s, false)
 
 	err := app.bot.EditMessageText(s.UserID, s.MenuMessageID,
 		app.printer.Sprintf("Enter number between %#v and %#v:", min, max))
 	if err != nil {
-		app.serverError(s.UserID, err)
-		return
+		return 0, err
 	}
 
 	for {
@@ -62,16 +57,14 @@ func (app *application) getInputFromUser(
 			// Delete message with user input
 			err := app.bot.DeleteMessage(msg.Chat.ID, msg.MessageID)
 			if err != nil {
-				app.serverError(s.UserID, err)
-				return
+				return 0, err
 			}
 
 			userInput, err := strconv.Atoi(msg.Text)
 			// correct input
 			if err == nil && userInput >= min && userInput <= max {
 				s.State = sessions.InMenu
-				out <- userInput
-				return
+				return userInput, nil
 			}
 
 			// incorrect input
@@ -85,11 +78,10 @@ func (app *application) getInputFromUser(
 					// and we don't care in this case
 					break
 				}
-				app.serverError(s.UserID, err)
-				return
+				return 0, err
 			}
 		case <-s.QuitInput:
-			return
+			return 0, errSessionTerminated
 		}
 	}
 }
