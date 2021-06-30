@@ -86,7 +86,7 @@ func main() {
 	flag.Parse()
 
 	if token == "" {
-		log.Fatal("You need to provide the token for the Telegram Bot!")
+		log.Fatal("You need to provide token for the Telegram Bot!")
 	}
 	if lang.String() == "und" {
 		lang = language.MustParse("en")

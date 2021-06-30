@@ -176,14 +176,14 @@ func (app *application) processCommand(m tg.Message) {
 	case "/help":
 		app.sendMessage(m.Chat.ID, app.printer.Sprintf("help message %d", app.operationsLimit))
 	case "/status":
-		operations, positions := app.queue.GetOperations(m.From.ID)
+		operations := app.queue.GetOperations(m.From.ID)
 		if len(operations) == 0 {
 			app.sendMessage(m.Chat.ID, app.printer.Sprintf("There aren't any operations in the queue."))
 			return
 		}
 
-		for i, op := range operations {
-			app.sendMessage(m.Chat.ID, app.createStatusMessage(op.Config, positions[i]))
+		for pos, op := range operations {
+			app.sendMessage(m.Chat.ID, app.createStatusMessage(op.Config, pos))
 		}
 	default:
 		app.sendMessage(m.Chat.ID, app.printer.Sprintf("Unrecognized command."))

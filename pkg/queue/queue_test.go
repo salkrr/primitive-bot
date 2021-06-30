@@ -78,8 +78,7 @@ func TestQueue_GetOperations(t *testing.T) {
 		name       string
 		userID     int64
 		queueState []Operation
-		Operations []Operation
-		Positions  []int
+		operations map[int]Operation
 	}{
 		{
 			name:   "Correctly returns operations of the user",
@@ -98,17 +97,16 @@ func TestQueue_GetOperations(t *testing.T) {
 					ImgPath: "test.png",
 				},
 			},
-			Operations: []Operation{
-				{
+			operations: map[int]Operation{
+				1: {
 					UserID:  123456789,
 					ImgPath: "hello_world.jpg",
 				},
-				{
+				3: {
 					UserID:  123456789,
 					ImgPath: "test.png",
 				},
 			},
-			Positions: []int{1, 3},
 		},
 		{
 			name:   "Returns nothing if no operations of the user",
@@ -127,8 +125,7 @@ func TestQueue_GetOperations(t *testing.T) {
 					ImgPath: "test.png",
 				},
 			},
-			Operations: nil,
-			Positions:  nil,
+			operations: map[int]Operation{},
 		},
 	}
 
@@ -139,12 +136,9 @@ func TestQueue_GetOperations(t *testing.T) {
 				q.Enqueue(op)
 			}
 
-			operations, positions := q.GetOperations(tt.userID)
-			if !reflect.DeepEqual(operations, tt.Operations) {
-				t.Errorf("Got operations: %v; want %v", operations, tt.Operations)
-			}
-			if !reflect.DeepEqual(positions, tt.Positions) {
-				t.Errorf("Got positions: %v; want %v", positions, tt.Positions)
+			operations := q.GetOperations(tt.userID)
+			if !reflect.DeepEqual(operations, tt.operations) {
+				t.Errorf("Got operations: %v; want %v", operations, tt.operations)
 			}
 		})
 	}
